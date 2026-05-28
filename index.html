@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CaniGesta - Canine Pregnancy Calculator & Breeder SaaS</title>
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="light-mode">
+  
+  <!-- Navigation Header -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="logo-area">
+        <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="currentColor"/>
+          <circle cx="12" cy="11" r="2.5" fill="var(--bg-card)"/>
+        </svg>
+        <span class="logo-text">Cani<span class="logo-accent">Gesta</span></span>
+        <span class="badge badge-saas">PRO</span>
+      </div>
+      
+      <div class="header-actions">
+        <!-- Quick Export Buttons -->
+        <button id="btn-print" class="btn btn-secondary-icon" title="Print & PDF Report">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><path d="M6 14h12v8H6z"/></svg>
+          <span class="btn-text">PDF Report</span>
+        </button>
+        
+        <button id="btn-download" class="btn btn-secondary-icon" title="Download as Offline Web App">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span class="btn-text">Download App</span>
+        </button>
+        
+        <!-- Dark Mode Toggle -->
+        <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main App Layout Container -->
+  <main class="app-main container">
+    
+    <!-- Top Hero Banner / Introduction -->
+    <section class="hero-banner card">
+      <div class="hero-content">
+        <h1>Canine Gestation & Reproduction Calculator</h1>
+        <p>A precision clinical-grade SaaS tool for veterinary assistants, breeders, and reproduction specialists. Enter dates below to calculate high-accuracy whelping windows, milestones, and care protocols.</p>
+      </div>
+      <div class="hero-decoration">
+        <!-- Modern minimalist dog reproduction line art/svg -->
+        <svg viewBox="0 0 120 120" class="dog-illustration">
+          <path d="M30 80c0-10 15-20 30-20s30 10 30 20c0 5-5 10-10 10H40c-5 0-10-5-10-10z" fill="var(--primary-light)" opacity="0.4"/>
+          <path d="M45 40c0-5 3-10 8-12 3 5 7 5 10 0 5 2 8 7 8 12v15H45V40z" fill="var(--primary)" opacity="0.3"/>
+          <circle cx="60" cy="55" r="30" stroke="var(--primary)" stroke-width="1.5" stroke-dasharray="3 3" fill="none"/>
+          <path d="M60 25c15 0 28 10 32 25" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <path d="M28 50c4-15 17-25 32-25" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" fill="none"/>
+          <circle cx="60" cy="55" r="5" fill="var(--accent)"/>
+          <circle cx="50" cy="52" r="3" fill="var(--primary-dark)"/>
+          <circle cx="70" cy="52" r="3" fill="var(--primary-dark)"/>
+        </svg>
+      </div>
+    </section>
+
+    <!-- Main Grid Dashboard -->
+    <div class="dashboard-grid">
+      
+      <!-- LEFT: Form Inputs -->
+      <section class="panel-card card" id="calculator-panel">
+        <div class="panel-header">
+          <div class="panel-icon-wrap">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <h2>Conception & Mating Data</h2>
+        </div>
+        
+        <form id="calc-form" class="calc-form">
+          <!-- Mating Date Input -->
+          <div class="form-group">
+            <label for="mating-date" class="form-label">
+              Mating Date <span class="required">*</span>
+              <span class="tooltip" title="The first date the mating occurred. Standard baseline for gestation.">i</span>
+            </label>
+            <input type="date" id="mating-date" class="form-control" required>
+          </div>
+
+          <!-- Ovulation Date Input (Optional) -->
+          <div class="form-group">
+            <label for="ovulation-date" class="form-label">
+              Ovulation Date <span class="optional">(Optional)</span>
+              <span class="tooltip" title="If confirmed by progesterone tests. Conception is exactly 63 days post-ovulation. When provided, this guarantees higher due-date precision.">i</span>
+            </label>
+            <input type="date" id="ovulation-date" class="form-control">
+          </div>
+
+          <!-- Gestation Period Input -->
+          <div class="form-group">
+            <div class="slider-header">
+              <label for="gestation-days" class="form-label">
+                Gestation Period
+                <span class="tooltip" title="Standard average canine pregnancy is 63 days. Ranges safely between 58 and 68 days depending on breed size, litter size, and genetics.">i</span>
+              </label>
+              <span id="gestation-badge" class="slider-badge">63 Days</span>
+            </div>
+            <input type="range" id="gestation-days" min="58" max="68" value="63" class="form-range">
+            <div class="range-labels">
+              <span>58d (Earliest)</span>
+              <span>63d (Average)</span>
+              <span>68d (Latest)</span>
+            </div>
+          </div>
+
+          <!-- Form Buttons -->
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary btn-full">
+              <span>Calculate Gestation Profile</span>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+            <button type="button" id="btn-reset" class="btn btn-secondary">Reset</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- RIGHT: Interactive Realtime Output & Metrics -->
+      <section class="panel-card card" id="results-panel">
+        <!-- Default State Dashboard (Before Input) -->
+        <div id="results-empty" class="results-empty-state">
+          <div class="pulse-ring">
+            <svg viewBox="0 0 24 24" class="heart-pulse" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+            </svg>
+          </div>
+          <h3>Awaiting Pregnancy Baseline</h3>
+          <p>Please select a mating date in the calculator panel. CaniGesta will instantly map the full 9-week clinical milestone timeline, care logs, and diagnostic checklists.</p>
+        </div>
+
+        <!-- Calculated Active State Dashboard -->
+        <div id="results-active" class="results-active-state" style="display: none;">
+          <div class="panel-header border-bottom">
+            <h2>Gestation Diagnostic Dashboard</h2>
+            <span id="header-status-badge" class="badge badge-success">Pregnancy Week 1</span>
+          </div>
+
+          <!-- Circular Gestation Tracker / Progress Path -->
+          <div class="gestation-progress-container">
+            <div class="progress-info">
+              <span class="progress-title">Pregnancy Progress</span>
+              <span id="progress-percent" class="progress-value">0%</span>
+            </div>
+            <!-- Gestation Progress Bar Graphic -->
+            <div class="gestation-track-wrapper">
+              <div class="gestation-track-bar" id="gestation-bar"></div>
+              <!-- Running puppy marker -->
+              <div class="gestation-runner" id="gestation-runner">🐕</div>
+            </div>
+            <div class="progress-track-ends">
+              <span id="track-start-date">Mating</span>
+              <span id="track-due-date">Due Date</span>
+            </div>
+          </div>
+
+          <!-- Premium Metric Grid -->
+          <div class="metrics-grid">
+            <!-- Metric 1: Due Date -->
+            <div class="metric-card card-inner shadow-soft">
+              <div class="metric-icon color-accent">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21V5a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2v16"/><path d="M12 11h.01"/><path d="M12 7h.01"/><path d="M8 11h.01"/><path d="M8 7h.01"/><path d="M16 11h.01"/><path d="M16 7h.01"/><line x1="12" y1="15" x2="12" y2="21"/></svg>
+              </div>
+              <div class="metric-content">
+                <span class="metric-label">Estimated Due Date</span>
+                <span id="metric-due-date" class="metric-value">-- --</span>
+                <span id="metric-due-countdown" class="metric-sub">-- days remaining</span>
+              </div>
+            </div>
+
+            <!-- Metric 2: Whelping Window -->
+            <div class="metric-card card-inner shadow-soft">
+              <div class="metric-icon color-primary">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M20 12v8H4v-8"/><path d="M20 12l-8-8-8 8"/></svg>
+              </div>
+              <div class="metric-content">
+                <span class="metric-label">Safe Whelping Window</span>
+                <span id="metric-whelping-window" class="metric-value">-- to --</span>
+                <span class="metric-sub">Days 58 to 68 (Conception baseline)</span>
+              </div>
+            </div>
+
+            <!-- Metric 3: Gestation Progress -->
+            <div class="metric-card card-inner shadow-soft">
+              <div class="metric-icon color-info">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              </div>
+              <div class="metric-content">
+                <span class="metric-label">Gestation Status</span>
+                <span id="metric-progress-days" class="metric-value">Day 0 / 63</span>
+                <span id="metric-progress-sub" class="metric-sub">Gestation is just starting</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Timeline & Checklist Sections (Visible after calculation) -->
+    <div id="extended-results" class="extended-results-section" style="display: none;">
+      
+      <!-- Week-by-Week Timeline -->
+      <section class="timeline-section card">
+        <div class="section-title-wrap">
+          <div class="panel-icon-wrap bg-primary-light">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          </div>
+          <div>
+            <h2>Canine Gestation: Week-by-Week Milestones</h2>
+            <p class="section-subtitle">Fully customized based on your dog's dates. Veterinary alerts and physiological transitions are detailed below.</p>
+          </div>
+        </div>
+
+        <div class="timeline-container" id="timeline-accordion-container">
+          <!-- Dynamically populated via app.js -->
+        </div>
+      </section>
+
+      <!-- Care Checklist -->
+      <section class="checklist-section card">
+        <div class="section-title-wrap">
+          <div class="panel-icon-wrap bg-success-light">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+          </div>
+          <div>
+            <h2>Breeder Essential Care Checklist</h2>
+            <p class="section-subtitle">A vital diagnostic checklist covering prenatal care, ultrasound verification, nutrition, and home-whelping box setup.</p>
+          </div>
+        </div>
+
+        <!-- Dynamic Checklist Grid -->
+        <div class="checklist-grid">
+          <div class="checklist-summary shadow-soft card-inner">
+            <div class="circle-progress-wrapper">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <path class="circle" id="checklist-circle-progress" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                <text x="18" y="20.35" class="percentage" id="checklist-percentage-text">0%</text>
+              </svg>
+            </div>
+            <div class="summary-details">
+              <h4>Preparation Checklist</h4>
+              <p>Keep track of essential reproductive protocols. As dates pass, standard checkpoints will automatically prompt action.</p>
+              <div id="checklist-completion-status" class="checklist-status-badge">0 / 6 Completed</div>
+            </div>
+          </div>
+
+          <div class="checklist-items" id="checklist-container">
+            <!-- Dynamically populated via app.js -->
+          </div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Professional Veterinary Disclaimer (Static & Premium) -->
+    <footer class="app-disclaimer-wrap card">
+      <div class="disclaimer-icon">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="disclaimer-content">
+        <h3>Professional Veterinary Disclaimer</h3>
+        <p>This Dog Pregnancy Calculator is designed for educational, breeder guidance, and scheduling estimations only. Canine gestation periods are subject to highly variable individual and breed deviations. It is <strong>critically important</strong> to partner with a qualified reproductive veterinarian to schedule clinical ultrasounds, perform pre-whelping skeletal X-rays (puppy count), and ensure full maternal maternal health. Never alter medication, diet, or whelping logistics without direct veterinary consultation.</p>
+      </div>
+    </footer>
+
+    <!-- Credits & Footer details -->
+    <div class="footer-credits text-center">
+      <p>&copy; 2026 CaniGesta. Client-side application. No private breeder data or mating dates are ever uploaded to any servers.</p>
+    </div>
+
+  </main>
+
+  <!-- PDF Print Overlay Structure (Invisible in normal view, styled specifically in print) -->
+  <div id="print-header" class="print-only">
+    <h2>CaniGesta Precision Gestation Profile</h2>
+    <hr>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
