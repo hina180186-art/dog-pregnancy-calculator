@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Us — CaniGesta</title>
+  <meta name="description" content="Get in touch with the CaniGesta team. Send us a message about your experience or any questions.">
+  <link rel="canonical" href="https://dog-pregnancy-calculator.vercel.app/contact.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" style="text-decoration:none;">
+        <svg class="logo-paw" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="9" cy="8" rx="4" ry="5.5" fill="currentColor" opacity="0.85"/>
+          <ellipse cx="18" cy="5.5" rx="4" ry="5.5" fill="currentColor"/>
+          <ellipse cx="27" cy="8" rx="4" ry="5.5" fill="currentColor" opacity="0.85"/>
+          <path d="M18 14C10.5 14 5 20 5 26C5 30 8 33 12 33C14 33 16 32 18 30C20 32 22 33 24 33C28 33 31 30 31 26C31 20 25.5 14 18 14Z" fill="currentColor"/>
+          <ellipse cx="4.5" cy="18" rx="3" ry="4" fill="currentColor" opacity="0.75"/>
+          <ellipse cx="31.5" cy="18" rx="3" ry="4" fill="currentColor" opacity="0.75"/>
+        </svg>
+        <span class="logo-text">Cani<span class="logo-accent">Gesta</span></span>
+      </a>
+      <a href="index.html" class="btn btn-ghost btn-sm" style="margin-left:auto;">← Back to App</a>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top: calc(var(--nav-height) + 48px); padding-bottom: 80px; max-width: 600px;">
+    <h1 style="margin-bottom: 8px;">Contact Us</h1>
+    <p class="text-sub" style="margin-bottom: 36px;">Got a question, found a bug, or want to share feedback? We read every message.</p>
+
+    <div class="panel-card card-shadow" style="padding: 36px;">
+      <!-- Formspree endpoint — replace YOUR_FORM_ID with real Formspree ID -->
+      <form id="contact-form" action="https://formspree.io/f/xkgwppbz" method="POST" class="calc-form">
+        <div class="form-group">
+          <label for="contact-name" class="form-label">Your Name <span class="required">*</span></label>
+          <input type="text" id="contact-name" name="name" class="form-control" placeholder="Jane Doe" required>
+        </div>
+        <div class="form-group">
+          <label for="contact-email" class="form-label">Email Address <span class="required">*</span></label>
+          <input type="email" id="contact-email" name="email" class="form-control" placeholder="jane@example.com" required>
+        </div>
+        <div class="form-group">
+          <label for="contact-subject" class="form-label">Subject</label>
+          <select id="contact-subject" name="subject" class="form-control">
+            <option value="General Question">General Question</option>
+            <option value="Bug Report">Bug Report</option>
+            <option value="Feature Request">Feature Request</option>
+            <option value="PRO Billing">PRO Billing</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="contact-message" class="form-label">Message <span class="required">*</span></label>
+          <textarea id="contact-message" name="message" class="form-control" rows="5" placeholder="Tell us how we can help…" required style="resize:vertical; min-height: 120px;"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full" style="margin-top: 8px;">Send Message 📨</button>
+      </form>
+
+      <div id="contact-success" class="email-success" style="display:none; margin-top: 16px;">
+        🎉 <strong>Message sent!</strong> We'll get back to you within 24–48 hours.
+      </div>
+
+      <div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--color-border);">
+        <p style="font-size: 0.85rem; color: var(--color-text-sub);">Alternatively, email us directly at <a href="mailto:hello@canigesta.com">hello@canigesta.com</a></p>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer" style="margin-top: 0;">
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <span>© 2026 CaniGesta · All rights reserved.</span>
+        <div class="footer-bottom-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Use</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const saved = localStorage.getItem('cg_theme');
+    if (saved === 'dark') document.body.classList.add('dark-mode');
+
+    document.getElementById('contact-form').addEventListener('submit', function(e) {
+      const btn = this.querySelector('button[type="submit"]');
+      btn.textContent = 'Sending…';
+      btn.disabled = true;
+      // Show success after Formspree redirects (if AJAX not supported, it redirects)
+      // For client-side success message:
+      setTimeout(() => {
+        this.style.display = 'none';
+        document.getElementById('contact-success').style.display = 'block';
+      }, 1000);
+    });
+  </script>
+</body>
+</html>

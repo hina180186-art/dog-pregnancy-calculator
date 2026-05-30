@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — CaniGesta</title>
+  <meta name="description" content="CaniGesta Privacy Policy. We collect no personal data. All calculations are performed client-side in your browser.">
+  <link rel="canonical" href="https://dog-pregnancy-calculator.vercel.app/privacy.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body class="light-mode">
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="index.html" class="nav-logo" style="text-decoration:none;">
+        <svg class="logo-paw" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <ellipse cx="9" cy="8" rx="4" ry="5.5" fill="currentColor" opacity="0.85"/>
+          <ellipse cx="18" cy="5.5" rx="4" ry="5.5" fill="currentColor"/>
+          <ellipse cx="27" cy="8" rx="4" ry="5.5" fill="currentColor" opacity="0.85"/>
+          <path d="M18 14C10.5 14 5 20 5 26C5 30 8 33 12 33C14 33 16 32 18 30C20 32 22 33 24 33C28 33 31 30 31 26C31 20 25.5 14 18 14Z" fill="currentColor"/>
+          <ellipse cx="4.5" cy="18" rx="3" ry="4" fill="currentColor" opacity="0.75"/>
+          <ellipse cx="31.5" cy="18" rx="3" ry="4" fill="currentColor" opacity="0.75"/>
+        </svg>
+        <span class="logo-text">Cani<span class="logo-accent">Gesta</span></span>
+      </a>
+      <a href="index.html" class="btn btn-ghost btn-sm" style="margin-left:auto;">← Back to App</a>
+    </div>
+  </nav>
+
+  <main class="container" style="padding-top: calc(var(--nav-height) + 48px); padding-bottom: 80px; max-width: 720px;">
+    <h1 style="margin-bottom: 8px;">Privacy Policy</h1>
+    <p class="text-sub" style="margin-bottom: 36px;">Last updated: May 30, 2026</p>
+
+    <div class="panel-card card-shadow" style="padding: 36px; line-height: 1.8;">
+      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Our Privacy Commitment</h2>
+      <p style="color: var(--color-text-sub); margin-bottom: 24px;">CaniGesta is designed with privacy as a core principle. <strong>We collect no personal data.</strong> All pregnancy calculations, breed lookups, and timeline generation happen entirely in your browser (client-side). No data is sent to any server.</p>
+
+      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">What We Do Not Collect</h2>
+      <ul style="color: var(--color-text-sub); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 6px;">
+        <li>Dog names, mating dates, or any pregnancy data you enter</li>
+        <li>Email addresses (unless you voluntarily submit a reminder form)</li>
+        <li>Location data, IP addresses, or browsing history</li>
+        <li>Cookies for tracking or analytics</li>
+      </ul>
+
+      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">localStorage Usage</h2>
+      <p style="color: var(--color-text-sub); margin-bottom: 24px;">If you create an account or save litters, this data is stored <strong>exclusively in your browser's localStorage</strong>. It never leaves your device. You can clear it at any time via your browser settings.</p>
+
+      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Third-Party Services</h2>
+      <p style="color: var(--color-text-sub); margin-bottom: 24px;">We load Google Fonts (for typography) and the jsPDF library (for PDF generation) from external CDNs. These may log your IP address per their own privacy policies. We do not control or access these logs.</p>
+
+      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Contact</h2>
+      <p style="color: var(--color-text-sub);">For any privacy questions, email us at <a href="mailto:privacy@canigesta.com">privacy@canigesta.com</a> or use the <a href="contact.html">contact form</a>.</p>
+    </div>
+  </main>
+
+  <footer class="site-footer" style="margin-top: 0;">
+    <div class="footer-bottom">
+      <div class="container footer-bottom-inner">
+        <span>© 2026 CaniGesta · All rights reserved.</span>
+        <div class="footer-bottom-links">
+          <a href="privacy.html">Privacy Policy</a>
+          <a href="terms.html">Terms of Use</a>
+          <a href="contact.html">Contact</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <script>
+    const saved = localStorage.getItem('cg_theme');
+    if (saved === 'dark') document.body.classList.add('dark-mode');
+  </script>
+</body>
+</html>

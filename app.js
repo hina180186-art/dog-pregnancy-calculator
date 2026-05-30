@@ -1,1307 +1,979 @@
-/* ----------------------------------------------------
-   CaniGesta App Logic - Upgraded B2C SaaS System
----------------------------------------------------- */
+/* ================================================================
+   CaniGesta — Complete SaaS Application Logic
+   All 25 fixes implemented: Auth, PDF, Checklist, Reminders, Toasts
+================================================================ */
 
-// 1. Breed Gestation Map (Small: 61d, Medium: 63d, Large: 64d)
+'use strict';
+
+// ── BREED DATABASE (Item 15) ──────────────────────────────────────
 const BREED_DATABASE = {
-  "Labrador": { group: "Medium", days: 63 },
-  "German Shepherd": { group: "Medium", days: 63 },
-  "Chihuahua": { group: "Small", days: 61 },
-  "Golden Retriever": { group: "Medium", days: 63 },
-  "French Bulldog": { group: "Small", days: 61 },
-  "Poodle": { group: "Medium", days: 63 },
-  "Beagle": { group: "Medium", days: 63 },
-  "Rottweiler": { group: "Large", days: 64 },
-  "Bulldog": { group: "Medium", days: 63 },
-  "Dachshund": { group: "Small", days: 61 },
-  "Husky": { group: "Large", days: 64 },
-  "Boxer": { group: "Medium", days: 63 },
-  "Pomeranian": { group: "Small", days: 61 },
-  "Shih Tzu": { group: "Small", days: 61 },
-  "Maltese": { group: "Small", days: 61 },
-  "Doberman": { group: "Large", days: 64 },
-  "Border Collie": { group: "Medium", days: 63 },
-  "Cocker Spaniel": { group: "Medium", days: 63 },
-  "Great Dane": { group: "Large", days: 64 },
-  "Cavalier King Charles": { group: "Small", days: 61 }
+  // Small (61 days, litter 2-4)
+  'Chihuahua':           { group: 'Small',  days: 61, litter: '2–4'  },
+  'Pomeranian':          { group: 'Small',  days: 61, litter: '2–4'  },
+  'Maltese':             { group: 'Small',  days: 61, litter: '2–4'  },
+  'Shih Tzu':            { group: 'Small',  days: 61, litter: '2–4'  },
+  'Dachshund':           { group: 'Small',  days: 61, litter: '2–4'  },
+  // Medium (63 days, litter 4-6)
+  'Beagle':              { group: 'Medium', days: 63, litter: '4–6'  },
+  'Cocker Spaniel':      { group: 'Medium', days: 63, litter: '4–6'  },
+  'Border Collie':       { group: 'Medium', days: 63, litter: '4–6'  },
+  'Bulldog':             { group: 'Medium', days: 63, litter: '4–6'  },
+  'French Bulldog':      { group: 'Medium', days: 63, litter: '4–6'  },
+  // Large (64 days, litter 6-10)
+  'Labrador':            { group: 'Large',  days: 64, litter: '6–10' },
+  'Golden Retriever':    { group: 'Large',  days: 64, litter: '6–10' },
+  'German Shepherd':     { group: 'Large',  days: 64, litter: '6–10' },
+  'Husky':               { group: 'Large',  days: 64, litter: '6–10' },
+  'Boxer':               { group: 'Large',  days: 64, litter: '6–10' },
+  'Rottweiler':          { group: 'Large',  days: 64, litter: '6–10' },
+  'Doberman':            { group: 'Large',  days: 64, litter: '6–10' },
+  'Poodle':              { group: 'Large',  days: 64, litter: '6–10' },
+  'Great Dane':          { group: 'Large',  days: 64, litter: '6–10' },
+  'Cavalier King Charles': { group: 'Large', days: 64, litter: '6–10' }
 };
 
-// 2. Milestone Template (All 9 Weeks)
+// ── 9-WEEK TIMELINE (Item 18) ─────────────────────────────────────
 const TIMELINE_WEEKS = [
   {
-    week: 1,
-    title: "Conception & Cellular Division",
-    days: "Days 0 - 7",
-    description: "Following successful mating, egg fertilization occurs within the oviducts. The zygotes begin rapid cellular division (blastomeres) as they descend towards the uterine horns.",
-    clinical: "Maintain standard high-quality nutrition. Avoid excessive high-impact training, direct vaccinations, or systemic medication.",
-    highlights: [
-      { type: "info", title: "Oviduct Transit", desc: "Zygotes divide while traveling to the uterus." },
-      { type: "info", title: "Activity Care", desc: "Keep exercise moderate and stress levels low." }
-    ]
+    week: 1, title: 'Conception & Cellular Division', days: 'Days 0–7',
+    description: 'Following successful mating, fertilized eggs begin rapid cellular division (blastomeres) as they travel through the oviducts toward the uterine horns. No external signs are visible at this stage.',
+    clinical: 'Maintain standard high-quality nutrition. Avoid excessive high-impact training, vaccinations, or systemic medication during this critical early window.'
   },
   {
-    week: 2,
-    title: "Entering the Uterine Lining",
-    days: "Days 8 - 14",
-    description: "The dividing blastocysts enter the uterine horns and space themselves out freely within the uterine fluids. Secretions from the uterine lining increase to nourish them.",
-    clinical: "Maintain normal food portions. Do not overfeed early on—overweight dams face significantly higher risks of dystocia (difficult labor).",
-    highlights: [
-      { type: "info", title: "Blastocyst Spacing", desc: "Embryos arrange themselves evenly inside uterine horns." },
-      { type: "info", title: "Stable Nutrition", desc: "Keep dietary calories strictly at pre-breeding maintenance." }
-    ]
+    week: 2, title: 'Entering the Uterine Lining', days: 'Days 8–14',
+    description: 'Blastocysts enter the uterine horns and space themselves out freely. Secretions from the uterine lining increase to nourish them. The embryos are still microscopic.',
+    clinical: 'Maintain normal food portions — do not overfeed early. Overweight dams face significantly higher dystocia (difficult labor) risk. Keep stress levels low.'
   },
   {
-    week: 3,
-    title: "Embryonic Implantation",
-    days: "Days 15 - 21",
-    description: "Blastocysts implant firmly into the uterine wall, establishing the placental vascular supply. Organogenesis begins as the cellular layers organize.",
-    clinical: "Hormonal shifts can cause morning sickness, brief inappetence, or lethargy around Days 18-21. Offer small, highly palatable food portions.",
-    highlights: [
-      { type: "alert", title: "Placental Implantation", desc: "Conception is complete as embryos bind to the uterus." },
-      { type: "alert", title: "Morning Sickness", desc: "Mild nausea and brief food refusal are completely normal." }
-    ]
+    week: 3, title: 'Embryonic Implantation', days: 'Days 15–21',
+    description: 'Blastocysts implant firmly into the uterine wall, establishing the placental vascular supply. Organogenesis begins as cellular layers organize into organ systems.',
+    clinical: 'Hormonal shifts can cause morning sickness, brief inappetence, or lethargy (Days 18–21). Offer small, highly palatable food portions. This is completely normal.'
   },
   {
-    week: 4,
-    title: "Heartbeats & Clinical Scans",
-    days: "Days 22 - 28",
-    description: "Fetal heartbeats commence. The facial features, spinal cords, and limbs develop. The fetuses grow to about 15mm in length.",
-    clinical: "CRITICAL VETERINARY WINDOW. Schedule a clinic ultrasound or blood Relaxin test post Day 25 to confirm pregnancy and assess fetal heartbeats.",
-    highlights: [
-      { type: "alert", title: "Ultrasound scan (Day 25+)", desc: "Best window to confirm viability and verify active heartbeats." },
-      { type: "info", title: "Rapid Development", desc: "Central nervous system and organ systems solidify." }
-    ]
+    week: 4, title: 'Heartbeats & Clinical Scans', days: 'Days 22–28',
+    description: 'Fetal heartbeats commence. Facial features, spinal cords, and limbs begin developing. Fetuses grow to approximately 15mm. This is the most critical diagnostic window.',
+    clinical: 'CRITICAL: Schedule a clinic ultrasound or blood Relaxin test after Day 25 to confirm pregnancy and assess fetal heartbeats. Do not miss this window.'
   },
   {
-    week: 5,
-    title: "Gestation Transition & Puppy Food",
-    days: "Days 29 - 35",
-    description: "The embryos are now officially designated as fetuses. The toes separate, claws form, gender differences stabilize, and whiskers grow.",
-    clinical: "DIETARY INCREASE. Gradually transition the dam to high-calorie gestation kibble (e.g. premium puppy food). Increase her daily caloric intake by 10%.",
-    highlights: [
-      { type: "alert", title: "Calorie Upgrade", desc: "Begin feeding high-energy gestation or premium puppy food." },
-      { type: "info", title: "Toes & Claws Form", desc: "Paws develop separate toes and solid claw follicles." }
-    ]
+    week: 5, title: 'Gestation Transition & Puppy Food', days: 'Days 29–35',
+    description: 'Embryos are now officially fetuses. Toes separate, claws form, gender differences stabilize, and whiskers grow. The dam\'s abdomen begins visibly rounding.',
+    clinical: 'DIETARY CHANGE: Begin transitioning to high-calorie gestation kibble or premium puppy food. Gradually increase daily caloric intake by 10% each week going forward.'
   },
   {
-    week: 6,
-    title: "Pigmentation & Abdominal Crowding",
-    days: "Days 36 - 42",
-    description: "The skeleton calcifies, eyes close for protection, and skin pigmentation emerges. Fetal heartbeats grow extremely loud on stethoscope.",
-    clinical: "MEAL SPLITTING. The growing uterus crowds the stomach. Split her daily food portion into 3 to 4 smaller, highly concentrated meals.",
-    highlights: [
-      { type: "info", title: "Skeleton Hardening", desc: "Skeletal system absorbs calcium to mineralize bones." },
-      { type: "alert", title: "Frequent Small Meals", desc: "Transition to 3-4 portions daily to combat stomach crowding." }
-    ]
+    week: 6, title: 'Pigmentation & Abdominal Crowding', days: 'Days 36–42',
+    description: 'The skeleton calcifies, eyes close for protection, and skin pigmentation emerges. Fetal heartbeats grow loud on stethoscope. The dam\'s weight gain accelerates.',
+    clinical: 'MEAL SPLITTING: Growing uterus crowds the stomach. Split her daily food into 3–4 smaller concentrated meals to prevent gastric discomfort and ensure optimal absorption.'
   },
   {
-    week: 7,
-    title: "Nesting instinct & Whelping Box",
-    days: "Days 43 - 49",
-    description: "Hair follicles cover the body. The dam displays obvious nesting behaviors—scratching blankets and seeking quiet, secure shelters.",
-    clinical: "WHELPING BOX. Set up the nesting box in a peaceful, draft-free room. Encourage her to sleep there so she recognizes it as a secure birthing nest.",
-    highlights: [
-      { type: "alert", title: "Whelping Box Setup", desc: "Introduce the nest area. Make it warm, quiet, and familiar." },
-      { type: "info", title: "Coat Growth", desc: "Full hair coverage begins over all fetal skin layers." }
-    ]
+    week: 7, title: 'Nesting Instinct & Whelping Box', days: 'Days 43–49',
+    description: 'Hair follicles develop over the body. The dam displays clear nesting behaviors — scratching blankets, seeking quiet secure spaces, and becoming more protective.',
+    clinical: 'WHELPING BOX: Set up the nesting box in a peaceful, draft-free room. Encourage sleeping there so she identifies it as a safe, familiar birthing environment.'
   },
   {
-    week: 8,
-    title: "Skeletal Scans & Puppy Movement",
-    days: "Days 50 - 57",
-    description: "Puppies are fully formed. Active movements are visible and palpable through the dam's abdominal wall when she is resting.",
-    clinical: "X-RAY WINDOW (Day 55+). Schedule a pre-whelping X-ray. Skeletons are calcified; this lets you get an exact count to prevent stuck puppy emergencies.",
-    highlights: [
-      { type: "alert", title: "Skeletal X-Ray", desc: "Crucial for counting heads and spines before labor starts." },
-      { type: "info", title: "Palpable Movement", desc: "Puppies can be felt moving beneath the dam's skin." }
-    ]
+    week: 8, title: 'Skeletal Scans & Puppy Movement', days: 'Days 50–57',
+    description: 'Puppies are fully formed. Active movements are visible and palpable through the dam\'s abdominal wall. The dam may become restless, stop eating, or seek isolation.',
+    clinical: 'X-RAY WINDOW (Day 55+): Schedule a pre-whelping X-ray. Calcified skeletons allow an exact skull/spine count — essential for preventing stuck-puppy emergencies during delivery.'
   },
   {
-    week: 9,
-    title: "Labor Preparation & Temp Drop",
-    days: "Days 58 - 63+",
-    description: "Puppies are fully mature and capable of breathing. The dam produces milk and undergoes a rapid drop in rectal temperature before labor.",
-    clinical: "TEMPERATURE PROTOCOL. Take her rectal temperature twice daily. A sudden drop below 99°F (37.2°C) signals active stage 1 labor in 12-24 hours.",
-    highlights: [
-      { type: "alert", title: "Rectal Temperature Logs", desc: "Monitor 2x daily. Watch for the drop below 99°F." },
-      { type: "alert", title: "Breeding Staffing Ready", desc: "Gather towels, dental floss, baby scale, scissors, and vet contacts." }
-    ]
+    week: 9, title: 'Labor Preparation & Temperature Drop', days: 'Days 58–63+',
+    description: 'Puppies are fully mature and capable of breathing. The dam produces colostrum milk and undergoes a rapid rectal temperature drop 12–24 hours before active labor begins.',
+    clinical: 'TEMPERATURE PROTOCOL: Take rectal temperature twice daily. A sudden drop below 99°F (37.2°C) signals active Stage 1 labor within 12–24 hours. Have your whelping kit ready.'
   }
 ];
 
-// 3. Checklist Protocol (6 Core items)
-const CHECKLIST_METRICS = [
-  { id: "vet-ultrasound", dayOffset: 28, title: "Diagnostic Ultrasound Scan", desc: "Confirm pregnancy viability, check gestational sacs, and observe active heartbeats." },
-  { id: "nutrition-shift", dayOffset: 30, title: "Caloric Transition Phase", desc: "Begin transitioning the dam gradually to high-energy, nutrient-dense puppy/gestation food." },
-  { id: "whelping-box", dayOffset: 45, title: "Whelping Box Introduction", desc: "Construct/buy the nesting box in a peaceful room. Get her accustomed to sleeping inside." },
-  { id: "skeletal-xray", dayOffset: 55, title: "Canine Skeletal X-Ray Scan", desc: "Perform a reproductive clinic X-ray to count skulls and spines. Essential for safe delivery targets." },
-  { id: "supplies-gathering", dayOffset: 58, title: "Whelping Supplies Compilation", desc: "Prepare clean towels, dental floss for tying cords, sterilized scissors, a baby scale, and vet emergency hotlines." },
-  { id: "temp-tracking", dayOffset: 58, title: "Rectal Temperature Monitoring", desc: "Begin rectal temperature tracking 2-3 times daily. A drop below 99.0°F indicates labor within 24h." }
+// ── VET CHECKLIST ─────────────────────────────────────────────────
+const CHECKLIST_ITEMS = [
+  { id: 'log',        dayOffset: 0,  title: 'Record mating date and begin prenatal log' },
+  { id: 'ultrasound', dayOffset: 25, title: 'Schedule first vet appointment / ultrasound' },
+  { id: 'nutrition',  dayOffset: 35, title: 'Increase food intake by 25% — switch to puppy formula' },
+  { id: 'xray',       dayOffset: 45, title: 'Book pre-whelping X-ray (puppy count)' },
+  { id: 'whelping',   dayOffset: 49, title: 'Set up and introduce whelping box' },
+  { id: 'temp',       dayOffset: 58, title: 'Begin daily temperature monitoring (alert if below 99°F)' }
 ];
 
-// --- SaaS Local State Cache ---
-let appState = {
-  currentTab: "tab-calculator",
-  user: null, // Mock Auth Session
-  calculator: {
-    dogName: "",
-    breed: "",
-    matingDate: null,
-    ovulationDate: null,
-    gestationDays: 63,
-    calculatedDue: null,
-    earliestWhelping: null,
-    latestWhelping: null,
-    daysElapsed: 0,
-    daysRemaining: 0,
-    progressPercent: 0,
-    currentWeek: 1
-  },
-  litters: [], // Persisted litters
-  budget: {
-    expectedPups: 6,
-    vetCostVisit: 120,
-    vetVisitsCount: 4,
-    foodCostMonth: 80,
-    suppliesCost: 250,
-    totalCost: 0,
-    costPerPup: 0
+// ── APP STATE ─────────────────────────────────────────────────────
+const appState = {
+  currentTab: 'tab-calculator',
+  user: null,
+  litters: [],
+  calc: {
+    dogName: '', breed: '', breedGroup: '', litterSize: '4–6',
+    matingDate: null, ovulationDate: null, gestationDays: 63,
+    dueDate: null, earliestWhelp: null, latestWhelp: null,
+    daysElapsed: 0, daysRemaining: 0, progress: 0, currentWeek: 1
   }
 };
 
-// --- DOM Registry ---
-const dom = {
-  // Navigation
-  navLinks: document.querySelectorAll(".nav-link"),
-  tabViews: document.querySelectorAll(".tab-view"),
-  logo: document.getElementById("btn-logo"),
-  navPricing: document.getElementById("nav-btn-pricing"),
-  navAbout: document.getElementById("nav-btn-about"),
-  navProCta: document.getElementById("nav-pro-cta"),
-  authStatusBox: document.getElementById("auth-status-box"),
-  themeToggle: document.getElementById("theme-toggle"),
-  
-  // Modals
-  modalPricing: document.getElementById("modal-pricing"),
-  modalAuth: document.getElementById("modal-auth"),
-  modalCountdown: document.getElementById("modal-countdown"),
-  
-  btnClosePricing: document.getElementById("btn-close-pricing"),
-  btnCloseAuth: document.getElementById("btn-close-auth"),
-  btnCloseCountdown: document.getElementById("btn-close-countdown"),
-  
-  btnCheckoutPro: document.getElementById("btn-checkout-pro"),
-  btnCheckoutBreeder: document.getElementById("btn-checkout-breeder"),
-  
-  // Auth Tab Toggles
-  btnAuthTabLogin: document.getElementById("btn-auth-tab-login"),
-  btnAuthTabSignup: document.getElementById("btn-auth-tab-signup"),
-  panelAuthLogin: document.getElementById("auth-panel-login"),
-  panelAuthSignup: document.getElementById("auth-panel-signup"),
-  
-  formAuthLogin: document.getElementById("form-auth-login"),
-  formAuthSignup: document.getElementById("form-auth-signup"),
-  
-  // Calculator Form
-  calcForm: document.getElementById("calculator-form"),
-  inputDogName: document.getElementById("dog-name"),
-  inputBreed: document.getElementById("breed-select"),
-  inputMatingDate: document.getElementById("mating-date"),
-  inputOvulationDate: document.getElementById("ovulation-date"),
-  inputGestationDays: document.getElementById("gestation-days"),
-  gestationBadge: document.getElementById("gestation-days-badge"),
-  btnResetForm: document.getElementById("btn-reset-form"),
-  
-  // Active Dashboard Panel
-  resultsEmpty: document.getElementById("calc-empty-state"),
-  resultsActive: document.getElementById("calc-active-state"),
-  extendedOutputs: document.getElementById("extended-calculator-outputs"),
-  
-  displayDogTitle: document.getElementById("display-dog-title"),
-  displayDogSubtitle: document.getElementById("display-dog-subtitle"),
-  displayWeekBadge: document.getElementById("display-week-badge"),
-  displayProgressPercent: document.getElementById("display-progress-percent"),
-  barFill: document.getElementById("bar-fill"),
-  barRunner: document.getElementById("bar-runner"),
-  displayTrackStart: document.getElementById("display-track-start"),
-  displayTrackDue: document.getElementById("display-track-due"),
-  
-  displayDueDate: document.getElementById("display-due-date"),
-  displayDaysRemaining: document.getElementById("display-days-remaining"),
-  displayWhelpingWindow: document.getElementById("display-whelping-window"),
-  displayProgressDays: document.getElementById("display-progress-days"),
-  displayProgressStatus: document.getElementById("display-progress-status"),
-  
-  // Active Action triggers
-  btnSavePregnancy: document.getElementById("btn-save-pregnancy"),
-  btnPrintPdf: document.getElementById("btn-print-pdf"),
-  btnShareCountdown: document.getElementById("btn-share-countdown"),
-  
-  // Email reminders and timelines
-  emailForm: document.getElementById("email-reminders-form"),
-  emailSuccess: document.getElementById("email-success-message"),
-  checklistWrap: document.getElementById("checklist-items-wrap"),
-  timelineWrap: document.getElementById("timeline-weeks-wrap"),
-  
-  // Tab 2: Litters Dashboard
-  littersGate: document.getElementById("litters-auth-gate"),
-  littersActiveList: document.getElementById("litters-active-list"),
-  littersEmptyList: document.getElementById("litters-empty-list"),
-  btnAddLitterTab: document.getElementById("btn-add-litter-tab"),
-  
-  // Tab 3: Cost Estimator
-  costForm: document.getElementById("cost-estimator-form"),
-  costPupCount: document.getElementById("cost-pup-count"),
-  costPupBadge: document.getElementById("cost-pup-badge"),
-  costVetVisit: document.getElementById("cost-vet-visit"),
-  costVetVisitsCount: document.getElementById("cost-vet-visits-count"),
-  costFoodMonth: document.getElementById("cost-food-month"),
-  costSupplies: document.getElementById("cost-supplies"),
-  
-  displayTotalCost: document.getElementById("display-total-cost"),
-  displayCostPerPup: document.getElementById("display-cost-per-pup"),
-  listCostVet: document.getElementById("list-cost-vet"),
-  listCostFood: document.getElementById("list-cost-food"),
-  listCostSupplies: document.getElementById("list-cost-supplies"),
-  listCostMisc: document.getElementById("list-cost-misc"),
-  
-  // Countdown widget modal
-  countdownWidgetTitle: document.getElementById("countdown-widget-title"),
-  countdownWidgetTimer: document.getElementById("countdown-widget-timer"),
-  countdownIframeCode: document.getElementById("countdown-iframe-code"),
-  btnCopyWidgetCode: document.getElementById("btn-copy-widget-code"),
-  copySuccessMessage: document.getElementById("copy-success-message"),
-  
-  // Mobile bottom triggers
-  mobilePricingCta: document.getElementById("btn-mobile-pricing"),
-  footerPricing: document.getElementById("footer-btn-pricing"),
-  footerLitters: document.getElementById("footer-btn-litters")
-};
+// ── DOM CACHE ─────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const $$ = sel => document.querySelectorAll(sel);
 
-// --- Initialization Loader ---
-document.addEventListener("DOMContentLoaded", () => {
-  loadStoredSessions();
-  setupNavTabs();
-  setupEventListeners();
-  loadSavedTheme();
-  initFormDateLimits();
-  calculateBudgetExpenses(); // Init cost estimates
+// ── INIT ──────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  loadSession();
+  initTheme();
+  initNav();
+  initCalculatorForm();
+  initCostEstimator();
+  initModals();
+  initAuthForms();
+  blockFutureDates();
+  calculateBudget(); // seed cost display
 });
 
-// Avoid unrealistic dates (block future matings)
-function initFormDateLimits() {
-  const today = new Date().toISOString().split("T")[0];
-  dom.inputMatingDate.max = today;
-  dom.inputOvulationDate.max = today;
+// ── SESSION / AUTH ────────────────────────────────────────────────
+function loadSession() {
+  const savedUser = localStorage.getItem('cg_session');
+  if (savedUser) appState.user = JSON.parse(savedUser);
+
+  const savedLitters = localStorage.getItem('cg_litters');
+  if (savedLitters) appState.litters = JSON.parse(savedLitters);
+
+  renderAuthNav();
+  renderLittersTab();
 }
 
-// ----------------------------------------------------
-// MOCK AUTHENTICATION SYSTEM (localStorage)
-// ----------------------------------------------------
-function loadStoredSessions() {
-  // Load session
-  const storedUser = localStorage.getItem("canigesta_session");
-  if (storedUser) {
-    appState.user = JSON.parse(storedUser);
-  }
-  
-  // Load saved litters
-  const storedLitters = localStorage.getItem("canigesta_litters");
-  if (storedLitters) {
-    appState.litters = JSON.parse(storedLitters);
-  }
-  
-  syncAuthHeaderUI();
-  syncLittersDashboard();
-}
+function renderAuthNav() {
+  const box = $('auth-status-box');
+  if (!box) return;
 
-function syncAuthHeaderUI() {
-  if (appState.user) {
-    dom.authStatusBox.innerHTML = `
-      <div class="auth-user-dropdown">
-        <span class="user-greeting">👤 <strong>${appState.user.name}</strong></span>
-        <button class="btn btn-secondary btn-sm" id="btn-logout" style="margin-left:8px;">Logout</button>
+  if (appState.user && appState.user.loggedIn) {
+    const initials = getInitials(appState.user.name);
+    box.innerHTML = `
+      <div class="auth-user-pill">
+        <div class="user-avatar-initials" title="${appState.user.name}">${initials}</div>
+        <span class="user-name-display">${appState.user.name.split(' ')[0]}</span>
+        <button class="btn btn-ghost btn-sm" id="btn-signout">Sign Out</button>
       </div>
     `;
-    document.getElementById("btn-logout").addEventListener("click", performUserLogout);
-  } else {
-    dom.authStatusBox.innerHTML = `
-      <button class="btn btn-secondary btn-sm" id="btn-login-trigger">Log In</button>
+    $('btn-signout').addEventListener('click', signOut);
+
+    // Update mobile auth box too
+    const mobileBox = $('mobile-auth-box');
+    if (mobileBox) mobileBox.innerHTML = `
+      <span style="font-size:0.875rem; color:var(--color-text-sub);">👤 ${appState.user.name.split(' ')[0]}</span>
+      <button class="btn btn-ghost btn-sm" id="mobile-btn-signout">Sign Out</button>
     `;
-    document.getElementById("btn-login-trigger").addEventListener("click", () => openModal(dom.modalAuth));
+    const mso = $('mobile-btn-signout');
+    if (mso) mso.addEventListener('click', signOut);
+
+  } else {
+    box.innerHTML = `
+      <button class="btn btn-ghost btn-sm" id="btn-signin-trigger">Log In</button>
+      <button class="btn btn-accent btn-sm" id="btn-signup-trigger">Get PRO</button>
+    `;
+    $('btn-signin-trigger')?.addEventListener('click', () => openModal('modal-auth', 'login'));
+    $('btn-signup-trigger')?.addEventListener('click', () => openModal('modal-pricing'));
+
+    const mobileBox = $('mobile-auth-box');
+    if (mobileBox) mobileBox.innerHTML = `
+      <button class="btn btn-ghost btn-sm" id="mobile-btn-signin">Log In</button>
+      <button class="btn btn-accent btn-sm" id="mobile-btn-signup">Get PRO</button>
+    `;
+    $('mobile-btn-signin')?.addEventListener('click', () => openModal('modal-auth', 'login'));
+    $('mobile-btn-signup')?.addEventListener('click', () => openModal('modal-pricing'));
   }
 }
 
-function performUserLogout() {
+function getInitials(name) {
+  return name.trim().split(/\s+/).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+}
+
+function signOut() {
   appState.user = null;
-  localStorage.removeItem("canigesta_session");
-  syncAuthHeaderUI();
-  syncLittersDashboard();
+  localStorage.removeItem('cg_session');
+  renderAuthNav();
+  renderLittersTab();
+  showToast('Signed out successfully.');
 }
 
-function handleUserSignup(name, email, pass) {
-  // Create simple account
-  const newUser = { name, email };
-  appState.user = newUser;
-  localStorage.setItem("canigesta_session", JSON.stringify(newUser));
-  
-  closeModal(dom.modalAuth);
-  syncAuthHeaderUI();
-  syncLittersDashboard();
-}
-
-function handleUserLogin(email, pass) {
-  // Direct mock success
-  const user = { name: email.split("@")[0].toUpperCase(), email };
-  appState.user = user;
-  localStorage.setItem("canigesta_session", JSON.stringify(user));
-  
-  closeModal(dom.modalAuth);
-  syncAuthHeaderUI();
-  syncLittersDashboard();
-}
-
-// ----------------------------------------------------
-// MULTI-TAB CONTROLLER
-// ----------------------------------------------------
-function setupNavTabs() {
-  const switchTab = (tabId) => {
-    // Sync nav active tags
-    dom.navLinks.forEach(link => {
-      if (link.getAttribute("data-tab") === tabId) {
-        link.classList.add("active");
-      } else {
-        link.classList.remove("active");
-      }
-    });
-    
-    // Sync Tab visibility
-    dom.tabViews.forEach(view => {
-      if (view.id === tabId) {
-        view.classList.add("active");
-      } else {
-        view.classList.remove("active");
-      }
-    });
-
-    appState.currentTab = tabId;
-  };
-
-  dom.navLinks.forEach(link => {
-    link.addEventListener("click", (e) => {
-      const tabId = e.target.getAttribute("data-tab");
-      if (tabId) switchTab(tabId);
-    });
+// ── THEME ─────────────────────────────────────────────────────────
+function initTheme() {
+  const toggle = $('theme-toggle');
+  if (!toggle) return;
+  toggle.addEventListener('click', () => {
+    const isDark = document.body.classList.toggle('dark-mode');
+    localStorage.setItem('cg_theme', isDark ? 'dark' : 'light');
+    updateThemeIcons(isDark);
   });
+}
 
-  // Footer tab listeners
-  if (dom.footerLitters) {
-    dom.footerLitters.addEventListener("click", () => switchTab("tab-litters"));
+function initThemeEarly() {
+  const saved = localStorage.getItem('cg_theme');
+  if (saved === 'dark') {
+    document.body.classList.add('dark-mode');
+    updateThemeIcons(true);
   }
-  
-  document.querySelectorAll("[data-tab]").forEach(el => {
-    el.addEventListener("click", (e) => {
-      const tabId = el.getAttribute("data-tab");
-      if (tabId) switchTab(tabId);
-    });
-  });
 }
 
-// ----------------------------------------------------
-// CORE EVENT BINDINGS
-// ----------------------------------------------------
-function setupEventListeners() {
-  // Breed select triggers dynamic gestation period default updates
-  dom.inputBreed.addEventListener("change", (e) => {
-    const breed = e.target.value;
-    if (BREED_DATABASE[breed]) {
-      const defaultGestation = BREED_DATABASE[breed].days;
-      dom.inputGestationDays.value = defaultGestation;
-      dom.gestationBadge.textContent = `${defaultGestation} Days`;
+function updateThemeIcons(isDark) {
+  const sun = document.querySelector('.icon-sun');
+  const moon = document.querySelector('.icon-moon');
+  if (sun)  sun.style.display  = isDark ? 'none' : 'block';
+  if (moon) moon.style.display = isDark ? 'block' : 'none';
+}
+
+// Run theme before anything else
+initThemeEarly();
+
+// ── NAV / TABS ────────────────────────────────────────────────────
+function initNav() {
+  // Tab switching via data-tab
+  document.addEventListener('click', e => {
+    const tabTarget = e.target.closest('[data-tab]');
+    if (tabTarget) {
+      switchTab(tabTarget.getAttribute('data-tab'));
+      closeMobileMenu();
     }
   });
 
-  // Slider change trigger
-  dom.inputGestationDays.addEventListener("input", (e) => {
-    dom.gestationBadge.textContent = `${e.target.value} Days`;
+  // Pricing triggers
+  ['nav-btn-pricing', 'nav-pro-cta', 'mobile-btn-pricing', 'hero-btn-pricing-2',
+   'btn-mobile-pricing', 'footer-btn-pricing'].forEach(id => {
+    $(id)?.addEventListener('click', () => openModal('modal-pricing'));
   });
 
-  // Calculator submit
-  dom.calcForm.addEventListener("submit", (e) => {
-    e.preventDefault();
-    calculateCaninePregnancy();
+  // Pricing checkout triggers
+  $$('.btn-pro, .btn-primary').forEach(btn => {
+    if (btn.id === 'btn-checkout-pro' || btn.id === 'btn-checkout-breeder' || btn.textContent.includes('Get Started')) {
+      btn.addEventListener('click', e => {
+        if (!appState.user) {
+          openModal('modal-auth', 'signup');
+        } else {
+          showToast('Payment system coming soon — you will be notified!');
+        }
+      });
+    }
   });
 
-  // Reset Form
-  dom.btnResetForm.addEventListener("click", () => {
-    resetCalculatorForm();
+  // Hamburger
+  $('hamburger-btn')?.addEventListener('click', toggleMobileMenu);
+
+  // Close modals on overlay click
+  $$('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeModal(overlay.id);
+    });
   });
 
-  // Modal show & close listeners
-  dom.navPricing.addEventListener("click", () => openModal(dom.modalPricing));
-  dom.navProCta.addEventListener("click", () => openModal(dom.modalPricing));
-  dom.navAbout.addEventListener("click", () => {
-    document.getElementById("about-section").scrollIntoView({ behavior: "smooth" });
+  // ESC key closes modals
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      $$('.modal-overlay.open').forEach(m => closeModal(m.id));
+    }
   });
-  if (dom.footerPricing) {
-    dom.footerPricing.addEventListener("click", () => openModal(dom.modalPricing));
+}
+
+function switchTab(tabId) {
+  $$('.tab-view').forEach(v => v.classList.toggle('active', v.id === tabId));
+  $$('.nav-link[data-tab]').forEach(l => l.classList.toggle('active', l.getAttribute('data-tab') === tabId));
+  appState.currentTab = tabId;
+}
+
+function toggleMobileMenu() {
+  $('mobile-menu')?.classList.toggle('open');
+}
+function closeMobileMenu() {
+  $('mobile-menu')?.classList.remove('open');
+}
+
+// ── MODALS ────────────────────────────────────────────────────────
+function openModal(id, subPanel) {
+  const modal = $(id);
+  if (!modal) return;
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if (id === 'modal-auth' && subPanel) {
+    showAuthPanel(subPanel);
   }
-  if (dom.mobilePricingCta) {
-    dom.mobilePricingCta.addEventListener("click", () => openModal(dom.modalPricing));
-  }
+}
 
-  dom.btnClosePricing.addEventListener("click", () => closeModal(dom.modalPricing));
-  dom.btnCloseAuth.addEventListener("click", () => closeModal(dom.modalAuth));
-  dom.btnCloseCountdown.addEventListener("click", () => closeModal(dom.modalCountdown));
-  
-  // Checkout buttons click triggers check
-  dom.btnCheckoutPro.addEventListener("click", () => {
-    alert("Subscription checkout flows are simulated. Upgrade complete!");
-    closeModal(dom.modalPricing);
-  });
-  dom.btnCheckoutBreeder.addEventListener("click", () => {
-    alert("Enterprise billing options successfully activated!");
-    closeModal(dom.modalPricing);
-  });
+function closeModal(id) {
+  const modal = $(id);
+  if (!modal) return;
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
 
-  // Click outside to close modals
-  window.addEventListener("click", (e) => {
-    if (e.target === dom.modalPricing) closeModal(dom.modalPricing);
-    if (e.target === dom.modalAuth) closeModal(dom.modalAuth);
-    if (e.target === dom.modalCountdown) closeModal(dom.modalCountdown);
-  });
+function initModals() {
+  // Close buttons
+  $('btn-close-pricing')?.addEventListener('click',  () => closeModal('modal-pricing'));
+  $('btn-close-auth')?.addEventListener('click',     () => closeModal('modal-auth'));
+  $('btn-close-notify')?.addEventListener('click',   () => closeModal('modal-notify'));
+  $('btn-close-share')?.addEventListener('click',    () => closeModal('modal-share'));
 
-  // Auth Modal Toggles
-  dom.btnAuthTabLogin.addEventListener("click", () => toggleAuthTabs("login"));
-  dom.btnAuthTabSignup.addEventListener("click", () => toggleAuthTabs("signup"));
-
-  dom.formAuthLogin.addEventListener("submit", (e) => {
+  // Notify me form
+  $('notify-form')?.addEventListener('submit', e => {
     e.preventDefault();
-    const email = document.getElementById("login-email").value;
-    const pass = document.getElementById("login-pass").value;
-    handleUserLogin(email, pass);
+    const name = $('notify-name')?.value?.trim();
+    const email = $('notify-email')?.value?.trim();
+    if (email) {
+      localStorage.setItem('cg_waitlist', JSON.stringify({ name, email, ts: Date.now() }));
+      $('notify-form').style.display = 'none';
+      $('notify-success').style.display = 'block';
+    }
   });
 
-  dom.formAuthSignup.addEventListener("submit", (e) => {
+  // Share copy button
+  $('btn-copy-share')?.addEventListener('click', () => {
+    const text = $('share-text-display')?.textContent;
+    if (text) {
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('✅ Copied!');
+        $('share-copy-success').style.display = 'block';
+        setTimeout(() => { $('share-copy-success').style.display = 'none'; }, 2000);
+      }).catch(() => showToast('Please copy the text manually.'));
+    }
+  });
+}
+
+// ── AUTH FORMS ────────────────────────────────────────────────────
+function initAuthForms() {
+  // Tab toggles
+  $('btn-auth-tab-login')?.addEventListener('click', () => showAuthPanel('login'));
+  $('btn-auth-tab-signup')?.addEventListener('click', () => showAuthPanel('signup'));
+
+  // Cross-links
+  $('btn-go-signup')?.addEventListener('click', () => showAuthPanel('signup'));
+  $('btn-go-login')?.addEventListener('click', () => showAuthPanel('login'));
+  $('btn-go-login-2')?.addEventListener('click', () => showAuthPanel('login'));
+  $('btn-go-forgot')?.addEventListener('click', () => showAuthPanel('forgot'));
+
+  // LOGIN form
+  $('form-auth-login')?.addEventListener('submit', e => {
     e.preventDefault();
-    const name = document.getElementById("signup-name").value;
-    const email = document.getElementById("signup-email").value;
-    const pass = document.getElementById("signup-pass").value;
-    handleUserSignup(name, email, pass);
+    const email = $('login-email')?.value?.trim();
+    const pass  = $('login-pass')?.value;
+    if (!email || !pass) return showToast('Please fill all fields.');
+
+    // Check stored user
+    const stored = JSON.parse(localStorage.getItem('cg_users') || '{}');
+    const user = stored[email];
+
+    if (user && user.password === btoa(pass)) {
+      loginUser({ name: user.name, email, loggedIn: true });
+    } else {
+      showToast('Incorrect email or password. Please try again.');
+    }
   });
 
-  // Action Buttons
-  dom.btnSavePregnancy.addEventListener("click", saveLitterProfile);
-  dom.btnPrintPdf.addEventListener("click", generatePrintablePdfReport);
-  dom.btnShareCountdown.addEventListener("click", openShareCountdownWidget);
-  dom.btnCopyWidgetCode.addEventListener("click", copyCountdownEmbedCode);
-
-  // Email Alerts submit
-  dom.emailForm.addEventListener("submit", (e) => {
+  // SIGNUP form
+  $('form-auth-signup')?.addEventListener('submit', e => {
     e.preventDefault();
-    const name = document.getElementById("reminder-name").value;
-    const email = document.getElementById("reminder-email").value;
+    const name    = $('signup-name')?.value?.trim();
+    const email   = $('signup-email')?.value?.trim();
+    const pass    = $('signup-pass')?.value;
+    const confirm = $('signup-confirm')?.value;
+
+    if (!name || !email || !pass) return showToast('Please fill all fields.');
+    if (pass !== confirm) return showToast('Passwords do not match.');
+    if (pass.length < 6)  return showToast('Password must be at least 6 characters.');
+
+    const users = JSON.parse(localStorage.getItem('cg_users') || '{}');
+    if (users[email]) {
+      return showToast('Email already registered. Please log in.');
+    }
+
+    users[email] = { name, email, password: btoa(pass), createdAt: Date.now() };
+    localStorage.setItem('cg_users', JSON.stringify(users));
+
+    loginUser({ name, email, loggedIn: true });
+  });
+
+  // FORGOT PASSWORD form
+  $('form-auth-forgot')?.addEventListener('submit', e => {
+    e.preventDefault();
+    $('forgot-success').style.display = 'block';
+    $('forgot-success').textContent = "If this email exists, a reset link has been sent.";
+    $('form-auth-forgot').style.display = 'none';
+    setTimeout(() => {
+      $('form-auth-forgot').style.display = 'flex';
+      $('forgot-success').style.display = 'none';
+      showAuthPanel('login');
+    }, 4000);
+  });
+}
+
+function showAuthPanel(panel) {
+  $$('.auth-tab').forEach(tab => tab.classList.remove('active'));
+  const tabMap = { login: 'btn-auth-tab-login', signup: 'btn-auth-tab-signup', forgot: 'btn-auth-tab-forgot' };
+  $(tabMap[panel])?.classList.add('active');
+
+  $('auth-panel-login').style.display  = panel === 'login'  ? 'block' : 'none';
+  $('auth-panel-signup').style.display = panel === 'signup' ? 'block' : 'none';
+  $('auth-panel-forgot').style.display = panel === 'forgot' ? 'block' : 'none';
+  $('btn-auth-tab-forgot').style.display = panel === 'forgot' ? 'inline-flex' : 'none';
+}
+
+function loginUser(user) {
+  appState.user = user;
+  localStorage.setItem('cg_session', JSON.stringify(user));
+  closeModal('modal-auth');
+  renderAuthNav();
+  renderLittersTab();
+  showToast(`Welcome, ${user.name.split(' ')[0]}! 👋`);
+}
+
+// ── CALCULATOR FORM ───────────────────────────────────────────────
+function initCalculatorForm() {
+  const form       = $('calculator-form');
+  const breedSel   = $('breed-select');
+  const gestSlider = $('gestation-days');
+  const gestBadge  = $('gestation-days-badge');
+
+  breedSel?.addEventListener('change', () => {
+    const breed = breedSel.value;
+    const info = BREED_DATABASE[breed];
+    if (info) {
+      gestSlider.value = info.days;
+      gestBadge.textContent = `${info.days} Days`;
+    }
+  });
+
+  gestSlider?.addEventListener('input', () => {
+    gestBadge.textContent = `${gestSlider.value} Days`;
+  });
+
+  $('cost-pup-count')?.addEventListener('input', e => {
+    const n = e.target.value;
+    $('cost-pup-badge').textContent = `${n} ${n === '1' ? 'Puppy' : 'Puppies'}`;
+    calculateBudget();
+  });
+
+  form?.addEventListener('submit', e => {
+    e.preventDefault();
+    runCalculation();
+  });
+
+  $('btn-reset-form')?.addEventListener('click', resetCalculator);
+  $('btn-save-pregnancy')?.addEventListener('click', savePregnancy);
+  $('btn-print-pdf')?.addEventListener('click', generatePDF);
+  $('btn-share-results')?.addEventListener('click', shareResults);
+  $('btn-print-page')?.addEventListener('click', () => window.print());
+
+  // Email reminders form
+  $('email-reminders-form')?.addEventListener('submit', e => {
+    e.preventDefault();
+    const btn = $('email-reminders-form').querySelector('button');
+    btn.textContent = 'Subscribing...';
+    const name  = $('reminder-name')?.value?.trim();
+    const email = $('reminder-email')?.value?.trim();
+    const dog   = appState.calc.dogName || 'your dog';
     
-    // Success trigger
-    dom.emailForm.style.display = "none";
-    dom.emailSuccess.style.display = "block";
+    // Validate email
+    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+      showToast('Please enter a valid email address.');
+      btn.textContent = 'Subscribe to Alerts';
+      return;
+    }
+    
+    // Mock Formspree submission using fetch
+    fetch('https://formspree.io/f/xkgwppbz', {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, name, dogName: dog, dueDate: appState.calc.dueDate, breed: appState.calc.breed })
+    })
+    .then(response => {
+      if (response.ok) {
+        $('email-reminders-form').style.display = 'none';
+        $('email-success-message').style.display = 'block';
+        $('email-success-dog-name').textContent = dog;
+        showToast('✅ Subscribed successfully!');
+      } else {
+        showToast('Something went wrong — please try again.');
+        btn.textContent = 'Subscribe to Alerts';
+      }
+    })
+    .catch(error => {
+      showToast('Something went wrong — please try again.');
+      btn.textContent = 'Subscribe to Alerts';
+    });
   });
-
-  // Litter Cost Estimator slider & inputs
-  dom.costPupCount.addEventListener("input", (e) => {
-    dom.costPupBadge.textContent = `${e.target.value} Puppies`;
-    calculateBudgetExpenses();
-  });
-  dom.costVetVisit.addEventListener("input", calculateBudgetExpenses);
-  dom.costVetVisitsCount.addEventListener("input", calculateBudgetExpenses);
-  dom.costFoodMonth.addEventListener("input", calculateBudgetExpenses);
-  dom.costSupplies.addEventListener("input", calculateBudgetExpenses);
-  
-  dom.btnAddLitterTab.addEventListener("click", () => {
-    // Switch to calculator tab and scroll to form
-    document.querySelector("[data-tab='tab-calculator']").click();
-    dom.inputDogName.focus();
-  });
-
-  // Theme switch
-  dom.themeToggle.addEventListener("click", toggleThemeMode);
 }
 
-// ----------------------------------------------------
-// UI MODAL UTILS
-// ----------------------------------------------------
-function openModal(modalEl) {
-  modalEl.classList.add("active");
-  document.body.style.overflow = "hidden"; // Block page scrolling
+function blockFutureDates() {
+  const today = new Date().toISOString().split('T')[0];
+  $('mating-date') && ($('mating-date').max = today);
+  $('ovulation-date') && ($('ovulation-date').max = today);
 }
 
-function closeModal(modalEl) {
-  modalEl.classList.remove("active");
-  document.body.style.overflow = "auto";
-}
+function runCalculation() {
+  const dogName      = ($('dog-name')?.value?.trim()) || 'Your Dog';
+  const breed        = $('breed-select')?.value;
+  const matingVal    = $('mating-date')?.value;
+  const ovulationVal = $('ovulation-date')?.value;
+  const gestDays     = parseInt($('gestation-days')?.value || '63');
 
-function toggleAuthTabs(mode) {
-  if (mode === "login") {
-    dom.btnAuthTabLogin.classList.add("active");
-    dom.btnAuthTabSignup.classList.remove("active");
-    dom.panelAuthLogin.style.display = "block";
-    dom.panelAuthSignup.style.display = "none";
-  } else {
-    dom.btnAuthTabSignup.classList.add("active");
-    dom.btnAuthTabLogin.classList.remove("active");
-    dom.panelAuthSignup.style.display = "block";
-    dom.panelAuthLogin.style.display = "none";
-  }
-}
+  if (!breed) { showToast('Please select a breed.'); return; }
+  if (!matingVal) { showToast('Please enter a mating date.'); return; }
 
-// ----------------------------------------------------
-// THEME CONTROLLER
-// ----------------------------------------------------
-function toggleThemeMode() {
-  const body = document.body;
-  const isDark = body.classList.contains("dark-mode");
-  
-  if (isDark) {
-    body.classList.remove("dark-mode");
-    body.classList.add("light-mode");
-    document.querySelector(".sun-icon").style.display = "block";
-    document.querySelector(".moon-icon").style.display = "none";
-    localStorage.setItem("canigesta_theme_v2", "light");
-  } else {
-    body.classList.remove("light-mode");
-    body.classList.add("dark-mode");
-    document.querySelector(".sun-icon").style.display = "none";
-    document.querySelector(".moon-icon").style.display = "block";
-    localStorage.setItem("canigesta_theme_v2", "dark");
-  }
-}
-
-function loadSavedTheme() {
-  const savedTheme = localStorage.getItem("canigesta_theme_v2");
-  const sunIcon = document.querySelector(".sun-icon");
-  const moonIcon = document.querySelector(".moon-icon");
-  
-  if (savedTheme === "dark") {
-    document.body.classList.remove("light-mode");
-    document.body.classList.add("dark-mode");
-    if (sunIcon) sunIcon.style.display = "none";
-    if (moonIcon) moonIcon.style.display = "block";
-  } else {
-    document.body.classList.remove("dark-mode");
-    document.body.classList.add("light-mode");
-    if (sunIcon) sunIcon.style.display = "block";
-    if (moonIcon) moonIcon.style.display = "none";
-  }
-}
-
-// ----------------------------------------------------
-// CALCULATOR CORE ENGINE
-// ----------------------------------------------------
-function calculateCaninePregnancy() {
-  const dogName = dom.inputDogName.value;
-  const breed = dom.inputBreed.value;
-  const matingDateVal = dom.inputMatingDate.value;
-  const ovulationDateVal = dom.inputOvulationDate.value;
-  const gestationDays = parseInt(dom.inputGestationDays.value);
-
-  if (!matingDateVal || !dogName || !breed) return;
-
-  const matingDate = new Date(matingDateVal + "T00:00:00");
-  let ovulationDate = null;
-  if (ovulationDateVal) {
-    ovulationDate = new Date(ovulationDateVal + "T00:00:00");
-  }
-
-  // Due Date Math (Ovulation is 63 days post-ovulation, Mating uses custom slider)
-  let calculatedDue = null;
-  if (ovulationDate) {
-    calculatedDue = new Date(ovulationDate.getTime());
-    calculatedDue.setDate(ovulationDate.getDate() + 63);
-  } else {
-    calculatedDue = new Date(matingDate.getTime());
-    calculatedDue.setDate(matingDate.getDate() + gestationDays);
-  }
-
-  const today = new Date();
+  const breedInfo  = BREED_DATABASE[breed] || { group: 'Medium', days: 63, litter: '4–6' };
+  const matingDate = new Date(matingVal + 'T00:00:00');
+  const today      = new Date();
   today.setHours(0, 0, 0, 0);
 
-  const oneDayMs = 24 * 60 * 60 * 1000;
-  
-  // Elapsed days calculations
-  const elapsedMs = today.getTime() - matingDate.getTime();
-  let daysElapsed = Math.floor(elapsedMs / oneDayMs);
-  if (daysElapsed < 0) daysElapsed = 0;
+  let baseDate = matingDate;
+  if (ovulationVal) {
+    baseDate = new Date(ovulationVal + 'T00:00:00');
+  }
 
-  // Remaining days calculations
-  const remainingMs = calculatedDue.getTime() - today.getTime();
-  let daysRemaining = Math.ceil(remainingMs / oneDayMs);
-  if (daysRemaining < 0) daysRemaining = 0;
+  const dueDate       = addDays(baseDate, gestDays);
+  const earliestWhelp = addDays(baseDate, 58);
+  const latestWhelp   = addDays(baseDate, 68);
+  const daysElapsed   = Math.max(0, Math.floor((today - matingDate) / 86400000));
+  const daysRemaining = Math.max(0, Math.floor((dueDate - today) / 86400000));
+  const progress      = Math.min(100, Math.max(0, Math.round((daysElapsed / gestDays) * 100)));
+  const currentWeek   = Math.min(9, Math.max(1, Math.ceil((daysElapsed + 1) / 7)));
 
-  // Progress metrics
-  const totalPregnancyDays = Math.ceil((calculatedDue.getTime() - matingDate.getTime()) / oneDayMs);
-  let progressPercent = Math.round((daysElapsed / totalPregnancyDays) * 100);
-  if (progressPercent > 100) progressPercent = 100;
-  if (progressPercent < 0) progressPercent = 0;
-
-  // Current pregnancy Week index
-  let currentWeek = Math.ceil((daysElapsed + 1) / 7);
-  if (currentWeek < 1) currentWeek = 1;
-  if (currentWeek > 9) currentWeek = 9;
-
-  // Earliest/Latest safe Whelping window (Days 58 to 68 from conception baseline)
-  const baselineConception = ovulationDate ? ovulationDate : matingDate;
-  
-  const earliestWhelping = new Date(baselineConception.getTime());
-  earliestWhelping.setDate(baselineConception.getDate() + 58);
-  
-  const latestWhelping = new Date(baselineConception.getTime());
-  latestWhelping.setDate(baselineConception.getDate() + 68);
-
-  // Update App State Calculator
-  appState.calculator = {
-    dogName,
-    breed,
-    matingDate,
-    ovulationDate,
-    gestationDays,
-    calculatedDue,
-    earliestWhelping,
-    latestWhelping,
-    daysElapsed,
-    daysRemaining,
-    progressPercent,
-    currentWeek
+  appState.calc = {
+    dogName, breed, breedGroup: breedInfo.group, litterSize: breedInfo.litter,
+    matingDate, ovulationDate: ovulationVal ? new Date(ovulationVal + 'T00:00:00') : null,
+    gestationDays: gestDays, dueDate, earliestWhelp, latestWhelp,
+    daysElapsed, daysRemaining, progress, currentWeek
   };
 
-  // Sync Active UIs
-  renderActiveDashboardUI();
-  populateMilestonesTimeline();
-  populateChecklistPanel();
-
-  // Reset Subscriptions success window
-  dom.emailForm.style.display = "flex";
-  dom.emailSuccess.style.display = "none";
-
-  // Swap empty and active state containers
-  dom.resultsEmpty.style.display = "none";
-  dom.resultsActive.style.display = "block";
-  dom.extendedOutputs.style.display = "block";
-
-  // Scroll smoothly to results
-  dom.resultsActive.scrollIntoView({ behavior: "smooth" });
+  renderResults();
 }
 
-function renderActiveDashboardUI() {
-  const calc = appState.calculator;
-  
-  dom.displayDogTitle.textContent = `${calc.dogName}'s Gestation`;
-  
-  const formattedMating = formatDateHuman(calc.matingDate);
-  dom.displayDogSubtitle.textContent = `${calc.breed} · Mated on ${formattedMating}`;
-  
-  dom.displayWeekBadge.textContent = calc.daysElapsed >= calc.gestationDays ? "Overdue / Whelping" : `Week ${calc.currentWeek} of 9`;
-  
-  // Progress Bar updates
-  dom.displayProgressPercent.textContent = `${calc.progressPercent}%`;
-  dom.barFill.style.width = `${calc.progressPercent}%`;
-  dom.barRunner.style.left = `${calc.progressPercent}%`;
-  
-  dom.displayTrackStart.textContent = formatDateHuman(calc.matingDate);
-  dom.displayTrackDue.textContent = formatDateHuman(calc.calculatedDue);
-  
-  // Metric Cards
-  dom.displayDueDate.textContent = formatDateHuman(calc.calculatedDue);
-  dom.displayDaysRemaining.textContent = calc.daysRemaining > 0 
-    ? `${calc.daysRemaining} days until whelping` 
-    : "Dam is fully ready to deliver!";
-    
-  dom.displayWhelpingWindow.textContent = `${formatDateHuman(calc.earliestWhelping)} - ${formatDateHuman(calc.latestWhelping)}`;
-  
-  dom.displayProgressDays.textContent = `Day ${calc.daysElapsed} / ${calc.gestationDays}`;
-  
-  // Descriptive captions
-  if (calc.progressPercent === 0) {
-    dom.displayProgressStatus.textContent = "Conception is just commencing.";
-  } else if (calc.progressPercent < 30) {
-    dom.displayProgressStatus.textContent = "Blastomere division and travel down oviducts.";
-  } else if (calc.progressPercent < 50) {
-    dom.displayProgressStatus.textContent = "Successful uterine wall implantation.";
-  } else if (calc.progressPercent < 85) {
-    dom.displayProgressStatus.textContent = "Rapid fetal bone calcification and skeleton setup.";
-  } else if (calc.progressPercent < 100) {
-    dom.displayProgressStatus.textContent = "Final coat coverage, milk prep, nesting instincts.";
-  } else {
-    dom.displayProgressStatus.textContent = "Labor is highly imminent!";
-  }
+function renderResults() {
+  const c = appState.calc;
+
+  $('calc-empty-state').style.display = 'none';
+  $('calc-active-state').style.display = 'block';
+  $('extended-calculator-outputs').style.display = 'block';
+
+  $('display-dog-title').textContent   = `${c.dogName}'s Gestation`;
+  $('display-dog-subtitle').textContent = `${c.breed} · ${c.breedGroup} Breed · Mated ${formatDate(c.matingDate)}`;
+  $('display-week-badge').textContent  = `Week ${c.currentWeek} of 9`;
+
+  $('display-progress-percent').textContent = `${c.progress}%`;
+  $('bar-fill').style.width   = `${c.progress}%`;
+  $('bar-runner').style.left  = `${c.progress}%`;
+  $('display-track-start').textContent = `Mated ${formatDate(c.matingDate)}`;
+  $('display-track-due').textContent   = `Due ${formatDate(c.dueDate)}`;
+
+  $('display-due-date').textContent        = formatDateLong(c.dueDate);
+  $('display-days-remaining').textContent  = `${c.daysRemaining} day${c.daysRemaining !== 1 ? 's' : ''} remaining`;
+  $('display-whelping-window').textContent = `${formatDate(c.earliestWhelp)} – ${formatDate(c.latestWhelp)}`;
+  $('display-progress-days').textContent   = `Day ${c.daysElapsed} of ${c.gestationDays}`;
+  $('display-progress-status').textContent = TIMELINE_WEEKS[c.currentWeek - 1]?.title || '';
+  $('display-litter-size').textContent     = c.litterSize;
+
+  $('email-dog-name-display').textContent = c.dogName;
+
+  renderChecklist();
+  renderTimeline();
 }
 
-// ----------------------------------------------------
-// DYNAMIC 9-WEEK TIMELINE ACCORDIONS
-// ----------------------------------------------------
-function populateMilestonesTimeline() {
-  dom.timelineWrap.innerHTML = "";
-  const calc = appState.calculator;
-  const matingTime = calc.matingDate.getTime();
-  const oneDayMs = 24 * 60 * 60 * 1000;
+// ── CHECKLIST ─────────────────────────────────────────────────────
+function renderChecklist() {
+  const wrap = $('checklist-items-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const today = new Date(); today.setHours(0,0,0,0);
+  const c = appState.calc;
+  
+  let completedCount = 0;
 
-  TIMELINE_WEEKS.forEach((w) => {
-    const dayStartNum = (w.week - 1) * 7;
-    const dayEndNum = (w.week * 7) - 1;
-    
-    const weekStartCal = new Date(calc.matingDate.getTime());
-    weekStartCal.setDate(calc.matingDate.getDate() + dayStartNum);
-    
-    const weekEndCal = new Date(calc.matingDate.getTime());
-    weekEndCal.setDate(calc.matingDate.getDate() + dayEndNum);
+  CHECKLIST_ITEMS.forEach(item => {
+    const targetDate = addDays(c.matingDate, item.dayOffset);
+    const daysDiff   = Math.floor((targetDate - today) / 86400000); 
 
-    const isActive = calc.currentWeek === w.week;
-
-    const weekCard = document.createElement("div");
-    weekCard.className = `t-week-card ${isActive ? "active-week open" : ""}`;
-    weekCard.id = `t-card-week-${w.week}`;
-
-    // Highlights bullets
-    let hlHtml = "";
-    w.highlights.forEach(h => {
-      const icon = h.type === "alert" ? "⚠️" : "ℹ️";
-      hlHtml += `
-        <div class="t-hl-card">
-          <span class="hl-icon">${icon}</span>
-          <div>
-            <h5>${h.title}</h5>
-            <p>${h.desc}</p>
-          </div>
-        </div>
-      `;
-    });
-
-    weekCard.innerHTML = `
-      <div class="t-week-header">
-        <div class="t-left">
-          <div class="t-circle">${w.week}</div>
-          <div class="t-title-area">
-            <h3>${w.title}</h3>
-            <span class="t-dates">${formatDateHuman(weekStartCal)} to ${formatDateHuman(weekEndCal)} (${w.days})</span>
-          </div>
-        </div>
-        <div class="t-right">
-          ${isActive ? '<span class="badge-accent">Active Now</span>' : ''}
-          <svg class="arrow-svg" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-      </div>
-      <div class="t-content" style="${isActive ? 'max-height:800px;' : 'max-height:0px;'}">
-        <div class="t-content-inner">
-          <p>${w.description}</p>
-          <div class="t-highlights">
-            ${hlHtml}
-          </div>
-          <div class="t-clinical">
-            <h4>Veterinary Reproductive Guidance</h4>
-            <p>${w.clinical}</p>
-          </div>
-        </div>
-      </div>
-    `;
-
-    // Click handler to open/close accordion
-    weekCard.querySelector(".t-week-header").addEventListener("click", () => {
-      const isOpen = weekCard.classList.contains("open");
-      const content = weekCard.querySelector(".t-content");
-      if (isOpen) {
-        content.style.maxHeight = "0px";
-        weekCard.classList.remove("open");
-      } else {
-        content.style.maxHeight = "800px";
-        weekCard.classList.add("open");
-      }
-    });
-
-    dom.timelineWrap.appendChild(weekCard);
-  });
-}
-
-// ----------------------------------------------------
-// DYNAMIC AUTO-TICKING CHECKLIST
-// ----------------------------------------------------
-function populateChecklistPanel() {
-  dom.checklistWrap.innerHTML = "";
-  const calc = appState.calculator;
-
-  CHECKLIST_METRICS.forEach((item) => {
-    const targetDate = new Date(calc.matingDate.getTime());
-    targetDate.setDate(calc.matingDate.getDate() + item.dayOffset);
-
-    // Calculate Status logic (Done, Due Soon, Upcoming)
-    let statusClass = "status-upcoming";
-    let statusTag = `<span class="checklist-tag tag-upcoming">Upcoming</span>`;
-    let icon = "⏳";
-
-    const daysDiff = calc.daysElapsed - item.dayOffset;
-
-    if (calc.daysElapsed >= item.dayOffset) {
-      statusClass = "status-done";
-      statusTag = `<span class="checklist-tag tag-done">Done</span>`;
-      icon = "✅";
-    } else if (Math.abs(daysDiff) <= 3 || (item.dayOffset >= (calc.currentWeek - 1) * 7 && item.dayOffset < calc.currentWeek * 7)) {
-      statusClass = "status-due";
-      statusTag = `<span class="checklist-tag tag-due">Due Soon</span>`;
-      icon = "🔔";
+    let status, icon, tagLabel, tagClass;
+    if (c.daysElapsed >= item.dayOffset) {
+      status   = 'status-done';    icon = '✅';
+      tagLabel = 'Completed';      tagClass = 'tag-done';
+      completedCount++;
+    } else if (daysDiff <= 3 && daysDiff >= 0) {
+      status   = 'status-due';    icon = '⏰';
+      tagLabel = 'Due soon';      tagClass = 'tag-due';
+    } else {
+      status   = 'status-upcoming'; icon = '⬜';
+      tagLabel = 'Upcoming';        tagClass = 'tag-upcoming';
     }
 
-    const row = document.createElement("div");
-    row.className = `checklist-row ${statusClass}`;
+    const row = document.createElement('div');
+    row.className = `checklist-row ${status}`;
     row.innerHTML = `
-      <span class="checklist-icon">${icon}</span>
-      <div class="chk-content">
+      <span class="chk-icon" style="font-size:1.2rem; ${status === 'status-done' ? '' : 'opacity:0.6;'}">${icon}</span>
+      <div class="chk-body">
         <div class="chk-top">
-          <h4 class="chk-title">${item.title}</h4>
-          <span class="chk-date">Due: ${formatDateHuman(targetDate)}</span>
+          <h4 class="chk-title" style="${status === 'status-done' ? 'text-decoration:line-through; color:var(--color-text-sub);' : ''}">${item.title}</h4>
+          <span class="chk-date">${formatDateLong(targetDate)}</span>
         </div>
-        <p class="chk-desc">${item.desc}</p>
-        ${statusTag}
+        <span class="chk-tag ${tagClass}">${tagLabel}</span>
+      </div>
+    `;
+    wrap.appendChild(row);
+  });
+  
+  const countDisplay = $('checklist-count-display');
+  if(countDisplay) {
+    countDisplay.textContent = `${completedCount} / 6 Completed`;
+  }
+}
+
+// ── TIMELINE ──────────────────────────────────────────────────────
+function renderTimeline() {
+  const wrap = $('timeline-weeks-wrap');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  const c = appState.calc;
+
+  TIMELINE_WEEKS.forEach(w => {
+    const weekStart  = addDays(c.matingDate, (w.week - 1) * 7);
+    const weekEnd    = addDays(c.matingDate, w.week * 7 - 1);
+    const isCurrent  = w.week === c.currentWeek;
+    const isPast     = w.week < c.currentWeek;
+
+    const card = document.createElement('div');
+    card.className = `t-week-card${isCurrent ? ' current-week open' : ''}${isPast ? ' past-week' : ''}`;
+
+    card.innerHTML = `
+      <button class="t-week-header" aria-expanded="${isCurrent}">
+        ${isCurrent ? '<span class="current-pulse" title="Current week"></span>' : `<span style="width:10px;height:10px;flex-shrink:0;"></span>`}
+        <span class="t-week-num">Week ${w.week}</span>
+        <span class="t-week-title">${w.title}</span>
+        <span class="t-week-dates">${formatDate(weekStart)} – ${formatDate(weekEnd)}</span>
+        <span class="t-chevron" aria-hidden="true">▾</span>
+      </button>
+      <div class="t-week-body">
+        <div class="t-week-content">
+          <p class="t-week-desc">${w.description}</p>
+          <div class="t-week-clinical">🩺 <strong>Clinical note:</strong> ${w.clinical}</div>
+        </div>
       </div>
     `;
 
-    dom.checklistWrap.appendChild(row);
+    card.querySelector('.t-week-header').addEventListener('click', () => {
+      const isOpen = card.classList.contains('open');
+      card.classList.toggle('open', !isOpen);
+    });
+
+    wrap.appendChild(card);
   });
 }
 
-// ----------------------------------------------------
-// MULTI-DOG LITTER MANAGER DATABASE
-// ----------------------------------------------------
-function saveLitterProfile() {
-  // If not logged in, prompt Auth Modal!
-  if (!appState.user) {
-    alert("Please sign up or log in to access the Multi-Dog Litter Dashboard.");
-    openModal(dom.modalAuth);
+// ── SAVE PREGNANCY ────────────────────────────────────────────────
+function savePregnancy() {
+  const c = appState.calc;
+  if (!c.dogName || !c.matingDate) {
+    showToast('Please run a calculation first.');
     return;
   }
 
-  const calc = appState.calculator;
-  if (!calc.dogName) return;
-
-  // Check if profile already exists, if so overwrite
-  const existsIndex = appState.litters.findIndex(l => l.dogName === calc.dogName);
-  
-  const litterProfile = {
-    dogName: calc.dogName,
-    breed: calc.breed,
-    matingDate: calc.matingDate.toISOString().split("T")[0],
-    ovulationDate: calc.ovulationDate ? calc.ovulationDate.toISOString().split("T")[0] : null,
-    gestationDays: calc.gestationDays,
-    calculatedDue: calc.calculatedDue.toISOString().split("T")[0],
-    progressPercent: calc.progressPercent,
-    currentWeek: calc.currentWeek,
-    daysElapsed: calc.daysElapsed,
-    daysRemaining: calc.daysRemaining
+  const profile = {
+    dogName: c.dogName, breed: c.breed, breedGroup: c.breedGroup,
+    matingDate: c.matingDate.toISOString().split('T')[0],
+    dueDate: c.dueDate.toISOString().split('T')[0],
+    gestationDays: c.gestationDays, savedAt: Date.now()
   };
 
-  if (existsIndex > -1) {
-    appState.litters[existsIndex] = litterProfile;
-    alert(`Updated ${calc.dogName}'s litter details successfully!`);
-  } else {
-    appState.litters.push(litterProfile);
-    alert(`Saved ${calc.dogName}'s pregnancy profile in My Litters!`);
+  if (!appState.user) {
+    if (confirm('Create a free account to save your litters across devices.\n\nClick OK to Sign Up, or Cancel to continue as Guest and save locally.')) {
+      openModal('modal-auth', 'signup');
+      return;
+    }
   }
 
-  // Persist to local storage
-  localStorage.setItem("canigesta_litters", JSON.stringify(appState.litters));
-  
-  syncLittersDashboard();
-  
-  // Open Tab 2 (My Litters) automatically
-  document.getElementById("nav-litters-link").click();
+  const idx = appState.litters.findIndex(l => l.dogName === c.dogName);
+  if (idx > -1) {
+    appState.litters[idx] = profile;
+  } else {
+    appState.litters.push(profile);
+  }
+
+  localStorage.setItem('cg_litters', JSON.stringify(appState.litters));
+  showToast(`✅ ${c.dogName} saved to My Litters!`);
+  renderLittersTab();
 }
 
-function syncLittersDashboard() {
-  // Clear lists
-  dom.littersActiveList.innerHTML = "";
-  
-  if (!appState.user) {
-    dom.littersGate.innerHTML = `
-      <div class="empty-state card-shadow" style="padding: 50px 30px;">
-        <div class="empty-icon">🔒</div>
-        <h3>Account Required</h3>
-        <p>Log in or sign up to store and manage multiple active dog litters inside your personal breeder dashboard.</p>
-        <button class="btn btn-primary" id="btn-dashboard-login" style="margin-top:15px;">Authenticate Free</button>
-      </div>
-    `;
-    document.getElementById("btn-dashboard-login").addEventListener("click", () => openModal(dom.modalAuth));
-    dom.littersActiveList.style.display = "none";
-    dom.littersEmptyList.style.display = "none";
+// ── MY LITTERS TAB ────────────────────────────────────────────────
+function renderLittersTab() {
+  const gate      = $('litters-auth-gate');
+  if (!gate) return;
+
+  gate.innerHTML = `
+    <div id="litters-active-list" class="litters-grid" style="display:none;"></div>
+    <div id="litters-empty-list" class="empty-state card-shadow panel-card" style="padding:50px 30px; display:none;">
+      <div style="font-size:3rem;">📁</div>
+      <h3>No Saved Litters Yet</h3>
+      <p>Go to the <strong>Calculator</strong> tab, run a pregnancy calculation, and click <strong>💾 Save to My Litters</strong> to store your dogs here.</p>
+      <button class="btn btn-primary" style="margin-top:16px;" data-tab="tab-calculator">Go to Calculator →</button>
+    </div>`;
+
+  const list  = $('litters-active-list');
+  const empty = $('litters-empty-list');
+
+  if (!appState.litters || appState.litters.length === 0) {
+    empty.style.display = 'flex';
     return;
   }
 
-  // Restore core container
-  dom.littersGate.innerHTML = `
-    <div id="litters-active-list" class="litters-grid"></div>
-    <div id="litters-empty-list" class="empty-state card-shadow" style="padding: 50px 30px; display:none;">
-      <div class="empty-icon">📁</div>
-      <h3>No Saved Litters</h3>
-      <p>You haven't saved any dog pregnancies yet. Go to the **Calculator** tab, calculate a profile, and click **"Save to My Litters"** to store your dogs here!</p>
-    </div>
-  `;
-  
-  const activeList = document.getElementById("litters-active-list");
-  const emptyList = document.getElementById("litters-empty-list");
+  list.style.display = 'grid';
+  appState.litters.forEach(l => {
+    // Recompute current week based on today
+    const matingDate = new Date(l.matingDate + 'T00:00:00');
+    const today = new Date(); today.setHours(0,0,0,0);
+    const dueDate = new Date(l.dueDate + 'T00:00:00');
+    const earliest = addDays(matingDate, 58);
+    const latest = addDays(matingDate, 68);
+    const daysElapsed = Math.max(0, Math.floor((today - matingDate) / 86400000));
+    const daysRemaining = Math.max(0, Math.floor((dueDate - today) / 86400000));
+    const progress = Math.min(100, Math.max(0, Math.round((daysElapsed / l.gestationDays) * 100)));
+    const currentWeek = Math.min(9, Math.max(1, Math.ceil((daysElapsed + 1) / 7)));
 
-  if (appState.litters.length === 0) {
-    activeList.style.display = "none";
-    emptyList.style.display = "block";
-    return;
-  }
-
-  activeList.style.display = "grid";
-  emptyList.style.display = "none";
-
-  appState.litters.forEach((l) => {
-    const card = document.createElement("div");
-    card.className = "litter-card card-shadow";
+    const card = document.createElement('div');
+    card.className = 'litter-card card-shadow';
     card.innerHTML = `
       <div class="l-top">
         <div>
-          <h3 class="l-dog-name">${l.dogName}</h3>
-          <span class="l-breed">${l.breed}</span>
+          <div class="l-dog-name">${l.dogName}</div>
+          <div class="l-breed">${l.breed} · ${l.breedGroup || 'Breed'}</div>
         </div>
-        <span class="badge">Week ${l.currentWeek}</span>
+        <span class="badge">Week ${currentWeek}/9</span>
       </div>
-      
       <div class="l-dates-row">
-        <div>
-          <span style="display:block; font-size:0.7rem; color:var(--color-text-sub);">DUE DATE</span>
-          <strong>${formatDateString(l.calculatedDue)}</strong>
-        </div>
-        <div style="text-align:right;">
-          <span style="display:block; font-size:0.7rem; color:var(--color-text-sub);">REMAINING</span>
-          <strong>${l.daysRemaining} Days</strong>
-        </div>
+        <div><span>DUE DATE</span><strong>${formatDateLong(dueDate)}</strong></div>
+        <div style="text-align:right"><span>WINDOW</span><strong>${formatDate(earliest)} – ${formatDate(latest)}</strong></div>
       </div>
-      
-      <div class="l-progress-box">
-        <div class="l-progress-txt">
-          <span>Pregnancy progress</span>
-          <span>${l.progressPercent}%</span>
-        </div>
-        <div class="l-track">
-          <div class="l-fill" style="width:${l.progressPercent}%;"></div>
-        </div>
+      <div class="l-progress">
+        <div class="l-progress-header"><span>Pregnancy progress</span><span>${progress}%</span></div>
+        <div class="l-track"><div class="l-fill" style="width:${progress}%"></div></div>
       </div>
-
       <div class="l-actions">
-        <button class="btn btn-secondary btn-sm btn-view-litter" data-dog="${l.dogName}">View Details</button>
-        <button class="btn btn-secondary btn-sm btn-delete-litter" data-dog="${l.dogName}" style="color:var(--color-orange); border-color:rgba(232,99,58,0.3)">Delete</button>
-      </div>
-    `;
+        <button class="btn btn-ghost" data-load="${l.dogName}">View Details</button>
+        <button class="btn btn-ghost" data-delete="${l.dogName}" style="color:var(--color-accent); border-color:rgba(232,99,58,0.3)">Delete</button>
+      </div>`;
 
-    // Bind item buttons
-    card.querySelector(".btn-view-litter").addEventListener("click", () => reloadSavedLitter(l));
-    card.querySelector(".btn-delete-litter").addEventListener("click", () => deleteSavedLitter(l.dogName));
-
-    activeList.appendChild(card);
+    card.querySelector('[data-load]')?.addEventListener('click', () => loadLitter(l));
+    card.querySelector('[data-delete]')?.addEventListener('click', () => deleteLitter(l.dogName));
+    list.appendChild(card);
+  });
+  
+  // Reattach tab listener for the empty state button
+  $$('[data-tab="tab-calculator"]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab('tab-calculator'));
   });
 }
 
-function reloadSavedLitter(litter) {
-  // Push inputs back to Form
-  dom.inputDogName.value = litter.dogName;
-  dom.inputBreed.value = litter.breed;
-  dom.inputMatingDate.value = litter.matingDate;
-  dom.inputOvulationDate.value = litter.ovulationDate ? litter.ovulationDate : "";
-  dom.inputGestationDays.value = litter.gestationDays;
-  dom.gestationBadge.textContent = `${litter.gestationDays} Days`;
-
-  // Submit form calculation
-  document.querySelector("[data-tab='tab-calculator']").click();
-  calculateCaninePregnancy();
+function loadLitter(l) {
+  $('dog-name').value           = l.dogName;
+  $('breed-select').value       = l.breed;
+  $('mating-date').value        = l.matingDate;
+  $('gestation-days').value     = l.gestationDays;
+  $('gestation-days-badge').textContent = `${l.gestationDays} Days`;
+  switchTab('tab-calculator');
+  runCalculation();
 }
 
-function deleteSavedLitter(dogName) {
-  if (confirm(`Are you sure you want to delete ${dogName}'s pregnancy logs?`)) {
-    appState.litters = appState.litters.filter(l => l.dogName !== dogName);
-    localStorage.setItem("canigesta_litters", JSON.stringify(appState.litters));
-    syncLittersDashboard();
-  }
+function deleteLitter(dogName) {
+  if (!confirm(`Delete ${dogName}'s pregnancy profile?`)) return;
+  appState.litters = appState.litters.filter(l => l.dogName !== dogName);
+  localStorage.setItem('cg_litters', JSON.stringify(appState.litters));
+  renderLittersTab();
+  showToast(`${dogName}'s profile deleted.`);
 }
 
-// ----------------------------------------------------
-// FINANCIAL LITTER COST ESTIMATOR
-// ----------------------------------------------------
-function calculateBudgetExpenses() {
-  const pupCount = parseInt(dom.costPupCount.value);
-  const costPerVisit = parseFloat(dom.costVetVisit.value) || 0;
-  const visits = parseInt(dom.costVetVisitsCount.value) || 0;
-  const foodPerMonth = parseFloat(dom.costFoodMonth.value) || 0;
-  const supplies = parseFloat(dom.costSupplies.value) || 0;
-
-  // Calculative sections
-  const totalVet = costPerVisit * visits;
-  const totalFood = foodPerMonth * 2; // Gestation is ~2 months
-  const miscellaneous = (totalVet + totalFood + supplies) * 0.10; // 10% Cushion
-
-  const grandTotal = totalVet + totalFood + supplies + miscellaneous;
-  const costPerPup = pupCount > 0 ? (grandTotal / pupCount) : 0;
-
-  // Render to DOM
-  dom.displayTotalCost.textContent = `$${grandTotal.toFixed(2)}`;
-  dom.displayCostPerPup.textContent = `$${costPerPup.toFixed(2)}`;
-  
-  dom.listCostVet.textContent = `$${totalVet.toFixed(2)}`;
-  dom.listCostFood.textContent = `$${totalFood.toFixed(2)}`;
-  dom.listCostSupplies.textContent = `$${supplies.toFixed(2)}`;
-  dom.listCostMisc.textContent = `$${miscellaneous.toFixed(2)}`;
-}
-
-// ----------------------------------------------------
-// EMBEDDABLE COUNTDOWN WIDGET
-// ----------------------------------------------------
-function openShareCountdownWidget() {
-  const calc = appState.calculator;
-  if (!calc.dogName) return;
-
-  dom.countdownWidgetTitle.textContent = `${calc.dogName}'s Puppies Countdown`;
-  dom.countdownWidgetTimer.textContent = `${calc.daysRemaining} Days Until Whelping!`;
-
-  // HTML iframe compiler
-  const embedCode = `<iframe src="https://dog-pregnancy-calculator.vercel.app/widget?dog=${encodeURIComponent(calc.dogName)}&due=${calc.calculatedDue.toISOString().split("T")[0]}" width="100%" height="220" style="border:1.5px solid #E8633A; border-radius:12px; max-width:460px;" scrolling="no"></iframe>`;
-  
-  dom.countdownIframeCode.value = embedCode;
-  dom.copySuccessMessage.style.display = "none";
-
-  openModal(dom.modalCountdown);
-}
-
-function copyCountdownEmbedCode() {
-  dom.countdownIframeCode.select();
-  dom.countdownIframeCode.setSelectionRange(0, 99999); // Mobile compatibility
-  
-  navigator.clipboard.writeText(dom.countdownIframeCode.value)
-    .then(() => {
-      dom.copySuccessMessage.style.display = "block";
-      setTimeout(() => {
-        dom.copySuccessMessage.style.display = "none";
-      }, 3000);
-    })
-    .catch(err => {
-      alert("Failed to copy embed code. Please copy manually.");
-    });
-}
-
-// ----------------------------------------------------
-// PDF REPORT EXPORTER (jsPDF + fallbacks)
-// ----------------------------------------------------
-function generatePrintablePdfReport() {
-  const calc = appState.calculator;
-  if (!calc.dogName) return;
-
-  const { jsPDF } = window.jspdf ? window.jspdf : {};
-
-  // Check if jsPDF CDN is loaded successfully
-  if (jsPDF) {
-    try {
-      const doc = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4"
-      });
-
-      // 1. Header Branded Banner
-      doc.setFillColor(27, 67, 50); // Deep Forest Green (#1B4332)
-      doc.rect(0, 0, 210, 35, "F");
-      
-      doc.setTextColor(253, 248, 243); // Warm Cream (#FDF8F3)
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(22);
-      doc.text("CaniGesta", 15, 18);
-      
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(10);
-      doc.text("Canine Pregnancy & Reproduction Diagnostics", 15, 25);
-      
-      doc.setFontSize(8);
-      doc.text("GENERATED BY CANIGESTA.COM", 160, 25);
-
-      // 2. Dog Information Grid Box
-      doc.setFillColor(250, 245, 239); // Warm Interior Card
-      doc.rect(15, 45, 180, 32, "F");
-      doc.setDrawColor(232, 223, 215);
-      doc.rect(15, 45, 180, 32, "S");
-
-      doc.setTextColor(27, 67, 50);
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(14);
-      doc.text(`${calc.dogName.toUpperCase()} - GESTATION CARD`, 20, 52);
-
-      doc.setTextColor(94, 109, 98); // Sub text
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
-      doc.text(`Breed: ${calc.breed}`, 20, 59);
-      doc.text(`Mating Date: ${formatDateHuman(calc.matingDate)}`, 20, 65);
-      if (calc.ovulationDate) {
-        doc.text(`Ovulation: ${formatDateHuman(calc.ovulationDate)}`, 20, 71);
-      } else {
-        doc.text("Ovulation Date: Not Confirmed (Standard Slider)", 20, 71);
-      }
-
-      doc.setFont("Helvetica", "bold");
-      doc.setTextColor(232, 99, 58); // Burnt Orange Accent (#E8633A)
-      doc.text(`DUE DATE: ${formatDateHuman(calc.calculatedDue)}`, 105, 59);
-      
-      doc.setTextColor(27, 67, 50);
-      doc.text(`WHELP WINDOW: ${formatDateHuman(calc.earliestWhelping)} - ${formatDateHuman(calc.latestWhelping)}`, 105, 65);
-      doc.text(`Current Status: Week ${calc.currentWeek} (Day ${calc.daysElapsed} of ${calc.gestationDays})`, 105, 71);
-
-      // 3. Veterinary Checklist
-      doc.setTextColor(27, 67, 50);
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(12);
-      doc.text("VETERINARY PRENATAL PROTOCOL", 15, 87);
-      
-      doc.setLineWidth(0.3);
-      doc.setDrawColor(27, 67, 50);
-      doc.line(15, 89, 195, 89);
-
-      let checklistY = 96;
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(9);
-      doc.setTextColor(29, 42, 34);
-
-      CHECKLIST_METRICS.forEach((item) => {
-        const itemDate = new Date(calc.matingDate.getTime());
-        itemDate.setDate(calc.matingDate.getDate() + item.dayOffset);
-
-        // Render checkbox
-        doc.rect(15, checklistY - 3, 3, 3);
-        
-        // Is checked? (Auto-tick if past)
-        if (calc.daysElapsed >= item.dayOffset) {
-          doc.line(15, checklistY - 1.5, 16.5, checklistY - 0.5);
-          doc.line(16.5, checklistY - 0.5, 18, checklistY - 3);
-        }
-
-        doc.setFont("Helvetica", "bold");
-        doc.text(`${item.title} (Due: ${formatDateHuman(itemDate)})`, 21, checklistY);
-        
-        doc.setFont("Helvetica", "normal");
-        const lines = doc.splitTextToSize(item.desc, 170);
-        doc.text(lines, 21, checklistY + 4.5);
-
-        checklistY += 12;
-      });
-
-      // 4. Milestone Timeline (Add New Page)
-      doc.addPage();
-      
-      // Page 2 Brand header
-      doc.setFillColor(27, 67, 50);
-      doc.rect(0, 0, 210, 15, "F");
-      doc.setTextColor(253, 248, 243);
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(10);
-      doc.text("CaniGesta Precision Gestation Milestones", 15, 10);
-
-      doc.setTextColor(27, 67, 50);
-      doc.setFontSize(12);
-      doc.text("9-WEEK CLINICAL PREGNANCY TABLE", 15, 26);
-      
-      doc.line(15, 28, 195, 28);
-
-      let weekY = 36;
-      TIMELINE_WEEKS.forEach((w) => {
-        const dayStartNum = (w.week - 1) * 7;
-        const dayEndNum = (w.week * 7) - 1;
-        
-        const weekStartCal = new Date(calc.matingDate.getTime());
-        weekStartCal.setDate(calc.matingDate.getDate() + dayStartNum);
-        
-        const weekEndCal = new Date(calc.matingDate.getTime());
-        weekEndCal.setDate(calc.matingDate.getDate() + dayEndNum);
-
-        doc.setFont("Helvetica", "bold");
-        doc.setTextColor(27, 67, 50);
-        doc.setFontSize(10);
-        doc.text(`WEEK ${w.week}: ${w.title}`, 15, weekY);
-
-        doc.setFont("Helvetica", "normal");
-        doc.setFontSize(8);
-        doc.setTextColor(143, 163, 150);
-        doc.text(`${formatDateHuman(weekStartCal)} to ${formatDateHuman(weekEndCal)} (${w.days})`, 140, weekY);
-
-        doc.setFontSize(8.5);
-        doc.setTextColor(29, 42, 34);
-        const descLines = doc.splitTextToSize(w.description, 180);
-        doc.text(descLines, 15, weekY + 4);
-
-        weekY += 18;
-      });
-
-      // Footer disclaimer on Page 2
-      doc.setFillColor(250, 245, 239);
-      doc.rect(15, 235, 180, 25, "F");
-      doc.setDrawColor(245, 166, 35);
-      doc.setLineWidth(0.5);
-      doc.rect(15, 235, 180, 25, "S");
-
-      doc.setTextColor(27, 67, 50);
-      doc.setFont("Helvetica", "bold");
-      doc.setFontSize(8);
-      doc.text("CLINICAL DISCLAIMER:", 20, 241);
-
-      doc.setFont("Helvetica", "normal");
-      doc.setFontSize(7.5);
-      const disclaimerTxt = "This report is generated for schedule estimations based on veterinary canine gestation metrics. Breeding ranges vary depending on litter size and maternal health. Never modify diet, schedules, or medical diagnostics without direct reproductive vet supervision.";
-      const discLines = doc.splitTextToSize(disclaimerTxt, 170);
-      doc.text(discLines, 20, 245);
-
-      // Save PDF
-      doc.save(`canigesta_gestation_report_${calc.dogName.toLowerCase()}.pdf`);
-
-    } catch (error) {
-      console.error("jsPDF failed, fallback to print:", error);
-      window.print();
-    }
-  } else {
-    // Redundant printing fallback
-    window.print();
-  }
-}
-
-// ----------------------------------------------------
-// HELPERS
-// ----------------------------------------------------
-function formatDateHuman(date) {
-  if (!date) return "--";
-  const options = { month: 'short', day: 'numeric', year: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
-}
-
-function formatDateString(dateStr) {
-  if (!dateStr) return "--";
-  const date = new Date(dateStr + "T00:00:00");
-  return formatDateHuman(date);
-}
-
-function resetCalculatorForm() {
-  dom.calcForm.reset();
-  dom.gestationBadge.textContent = "63 Days";
-  dom.inputGestationDays.value = 63;
-  
-  // Wipe state
-  appState.calculator = {
-    dogName: "",
-    breed: "",
-    matingDate: null,
-    ovulationDate: null,
-    gestationDays: 63,
-    calculatedDue: null,
-    earliestWhelping: null,
-    latestWhelping: null,
-    daysElapsed: 0,
-    daysRemaining: 0,
-    progressPercent: 0,
-    currentWeek: 1
+function resetCalculator() {
+  $('calculator-form')?.reset();
+  $('gestation-days-badge').textContent = '63 Days';
+  $('calc-empty-state').style.display = 'flex';
+  $('calc-active-state').style.display = 'none';
+  $('extended-calculator-outputs').style.display = 'none';
+  appState.calc = {
+    dogName: '', breed: '', breedGroup: '', litterSize: '4–6',
+    matingDate: null, ovulationDate: null, gestationDays: 63,
+    dueDate: null, earliestWhelp: null, latestWhelp: null,
+    daysElapsed: 0, daysRemaining: 0, progress: 0, currentWeek: 1
   };
-  
-  dom.resultsEmpty.style.display = "flex";
-  dom.resultsActive.style.display = "none";
-  dom.extendedOutputs.style.display = "none";
+}
+
+function shareResults() {
+  const c = appState.calc;
+  if (!c.dueDate) { showToast('Run a calculation first.'); return; }
+
+  const text = `🐾 ${c.dogName} is due on ${formatDateLong(c.dueDate)}! Currently in Week ${c.currentWeek} of 9. Estimated litter size: ${c.litterSize} puppies. Tracked with CaniGesta — dog-pregnancy-calculator.vercel.app`;
+  $('share-text-display').textContent = text;
+  $('share-copy-success').style.display = 'none';
+  openModal('modal-share');
+
+  if (navigator.share) {
+    navigator.share({ title: `${c.dogName}'s Pregnancy`, text, url: 'https://dog-pregnancy-calculator.vercel.app' }).catch(() => {});
+  }
+}
+
+// ── PDF EXPORT ────────────────────────────────────────────────────
+function generatePDF() {
+  const c = appState.calc;
+  if (!c.dueDate) { showToast('Run a calculation first to generate a PDF.'); return; }
+
+  const jsPDF = window.jspdf?.jsPDF;
+  if (!jsPDF) {
+    showToast('PDF library loading… please try again in a moment.');
+    return;
+  }
+
+  try {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const green = [27, 67, 50];
+    const orange = [232, 99, 58];
+    const cream  = [253, 248, 243];
+    const dark   = [44, 24, 16];
+    const sub    = [107, 91, 80];
+    const W = 210, M = 15;
+
+    doc.setFillColor(...green);
+    doc.rect(0, 0, W, 38, 'F');
+    doc.setTextColor(...cream);
+    doc.setFont('times', 'bold');
+    doc.setFontSize(22);
+    doc.text('CaniGesta — Canine Gestation Report', M, 16);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.text(new Date().toLocaleDateString(), W - M, 16, { align: 'right' });
+
+    doc.setFillColor(250, 246, 240);
+    doc.roundedRect(M, 46, W - M * 2, 38, 4, 4, 'F');
+    doc.setDrawColor(232, 221, 212);
+    doc.roundedRect(M, 46, W - M * 2, 38, 4, 4, 'S');
+
+    doc.setTextColor(...orange);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.text(`${c.dogName.toUpperCase()} — GESTATION OVERVIEW`, M + 8, 57);
+
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    doc.setTextColor(...sub);
+    doc.text(`Breed: ${c.breed} (${c.breedGroup})`, M + 8, 64);
+    doc.text(`Mating Date: ${formatDateLong(c.matingDate)}`, M + 8, 70);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(...green);
+    doc.text(`DUE DATE: ${formatDateLong(c.dueDate)}`, W / 2 + 8, 64);
+    doc.text(`WHELP WINDOW: ${formatDate(c.earliestWhelp)} – ${formatDate(c.latestWhelp)}`, W / 2 + 8, 70);
+    doc.setTextColor(...sub);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Week ${c.currentWeek} of 9 · ${c.daysRemaining} days remaining`, W / 2 + 8, 76);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...green);
+    doc.text('VETERINARY PRENATAL CHECKLIST', M, 100);
+    doc.setLineWidth(0.4);
+    doc.line(M, 103, W - M, 103);
+
+    let y = 110;
+    doc.setFontSize(9);
+    CHECKLIST_ITEMS.forEach(item => {
+      const date = addDays(c.matingDate, item.dayOffset);
+      const done = c.daysElapsed >= item.dayOffset;
+      // Use standard ascii fallback if unicode checkbox fails
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...dark);
+      const checkStr = done ? '[ X ]' : '[   ]';
+      doc.text(`${checkStr} ${item.title} (Due: ${formatDateLong(date)})`, M + 4, y);
+      y += 8;
+    });
+    
+    y += 10;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(12);
+    doc.setTextColor(...green);
+    doc.text('9-WEEK TIMELINE', M, y);
+    doc.setLineWidth(0.4);
+    doc.line(M, y+3, W - M, y+3);
+    
+    y += 12;
+    TIMELINE_WEEKS.forEach(w => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      const wkStart = addDays(c.matingDate, (w.week - 1) * 7);
+      const isCurr  = w.week === c.currentWeek;
+      
+      doc.setFont('helvetica', isCurr ? 'bold' : 'normal');
+      doc.setTextColor(...dark);
+      doc.text(`Week ${w.week}: ${w.title}`, M + 4, y);
+      doc.setFontSize(8);
+      doc.setTextColor(...sub);
+      doc.text(`${formatDate(wkStart)}`, W - M - 20, y);
+      doc.setFontSize(9);
+      y += 7;
+    });
+
+    const footerY = 280;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    doc.setTextColor(...sub);
+    doc.text('Generated by CaniGesta.com — For educational use only. Consult a reproductive DVM for clinical decisions.', W / 2, footerY, { align: 'center' });
+
+    doc.save(`${c.dogName.toLowerCase().replace(/\s+/g, '-')}-gestation-report.pdf`);
+    showToast(`✅ PDF report for ${c.dogName} downloaded!`);
+
+  } catch (err) {
+    console.error('jsPDF error:', err);
+    showToast('PDF generation failed.');
+  }
+}
+
+// ── COST ESTIMATOR ────────────────────────────────────────────────
+function initCostEstimator() {
+  const inputs = ['cost-vet-visit', 'cost-vet-visits-count', 'cost-food-month', 'cost-supplies'];
+  inputs.forEach(id => $(id)?.addEventListener('input', calculateBudget));
+  $('cost-pup-count')?.addEventListener('input', calculateBudget);
+  calculateBudget();
+}
+
+function calculateBudget() {
+  const pups    = parseInt($('cost-pup-count')?.value || '6');
+  const vetCost = parseFloat($('cost-vet-visit')?.value || '120');
+  const visits  = parseInt($('cost-vet-visits-count')?.value || '4');
+  const food    = parseFloat($('cost-food-month')?.value || '80');
+  const supplies = parseFloat($('cost-supplies')?.value || '250');
+
+  const totalVet  = vetCost * visits;
+  const totalFood = food * 2;
+  const misc      = (totalVet + totalFood + supplies) * 0.10;
+  const total     = totalVet + totalFood + supplies + misc;
+  const perPup    = pups > 0 ? total / pups : 0;
+
+  const set = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+  set('display-total-cost',  `$${total.toFixed(2)}`);
+  set('display-cost-per-pup', `$${perPup.toFixed(2)}`);
+  set('list-cost-vet',       `$${totalVet.toFixed(2)}`);
+  set('list-cost-food',      `$${totalFood.toFixed(2)}`);
+  set('list-cost-supplies',  `$${supplies.toFixed(2)}`);
+  set('list-cost-misc',      `$${misc.toFixed(2)}`);
+}
+
+// ── HELPERS ───────────────────────────────────────────────────────
+function addDays(date, days) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function formatDate(date) {
+  if (!date) return '—';
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+
+function formatDateLong(date) {
+  if (!date) return '—';
+  return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+}
+
+// ── TOAST NOTIFICATION ────────────────────────────────────────────
+function showToast(message) {
+  let toast = document.querySelector('.toast');
+  if (!toast) {
+    toast = document.createElement('div');
+    toast.className = 'toast';
+    document.body.appendChild(toast);
+  }
+  toast.textContent = message;
+  toast.classList.add('visible');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => toast.classList.remove('visible'), 3000);
 }
