@@ -5,8 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <!-- SEO Meta Tags (Item 29, 31) -->
-  <title>Dog Pregnancy Calculator 2026 — Free & Vet-Reviewed | CaniGesta</title>
+  <title>Dog Pregnancy Calculator 2026 — Free Vet-Reviewed Tool | CaniGesta</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
+  <script>
+    if (localStorage.getItem('cg_theme') === 'dark') document.documentElement.classList.add('dark-mode');
+  </script>
   <meta name="description" content="Free dog pregnancy calculator — get your dog's exact due date, week-by-week milestones, and vet care checklist. Trusted by 14,200+ breeders. Updated 2026.">
   <meta name="keywords" content="dog pregnancy calculator, canine gestation calculator, puppy due date, dog whelping calculator, dog gestation period">
   <meta name="author" content="CaniGesta">
@@ -57,6 +60,29 @@
   </script>
 </head>
 <body class="light-mode">
+<style>
+  html { scroll-behavior: smooth; }
+  .error-border { border-color: red !important; }
+  .error-msg { color: red; font-size: 0.75rem; margin-top: 4px; display: block; }
+  
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up-card {
+    opacity: 0;
+    animation: fadeUp 0.4s ease forwards;
+  }
+  
+  /* Toast Types */
+  .toast.toast-success { background: var(--color-primary); }
+  .toast.toast-error { background: #e74c3c; }
+  .toast.toast-info { background: #3498db; }
+  
+  .progress-fill.green { background: linear-gradient(90deg, #27ae60, #2ecc71); }
+  .progress-fill.amber { background: linear-gradient(90deg, #f39c12, #f1c40f); }
+  .progress-fill.red { background: linear-gradient(90deg, #c0392b, #e74c3c); }
+</style>
 
   <!-- ============================================================
        STICKY NAVIGATION (Item 1-7)

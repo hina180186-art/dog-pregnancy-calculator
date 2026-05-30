@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Privacy Policy — CaniGesta</title>
-  <meta name="description" content="CaniGesta Privacy Policy. We collect no personal data. All calculations are performed client-side in your browser.">
-  <link rel="canonical" href="https://dog-pregnancy-calculator.vercel.app/privacy.html">
+  <meta name="description" content="Privacy Policy for CaniGesta. Learn how we handle your data (we don't!).">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="app.css">
+  <script>if (localStorage.getItem('cg_theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
 </head>
 <body class="light-mode">
-  <nav class="navbar">
+  <nav class="navbar" id="main-navbar">
     <div class="nav-container">
       <a href="index.html" class="nav-logo" style="text-decoration:none;">
         <svg class="logo-paw" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -24,52 +25,45 @@
         </svg>
         <span class="logo-text">Cani<span class="logo-accent">Gesta</span></span>
       </a>
-      <a href="index.html" class="btn btn-ghost btn-sm" style="margin-left:auto;">← Back to App</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">← Back to Calculator</a>
+      </div>
     </div>
   </nav>
 
-  <main class="container" style="padding-top: calc(var(--nav-height) + 48px); padding-bottom: 80px; max-width: 720px;">
+  <main class="container" style="padding-top: calc(var(--nav-height) + 48px); padding-bottom: 80px; max-width: 800px;">
     <h1 style="margin-bottom: 8px;">Privacy Policy</h1>
-    <p class="text-sub" style="margin-bottom: 36px;">Last updated: May 30, 2026</p>
+    <p class="text-sub" style="margin-bottom: 36px;">Last updated: May 2026</p>
 
     <div class="panel-card card-shadow" style="padding: 36px; line-height: 1.8;">
-      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Our Privacy Commitment</h2>
-      <p style="color: var(--color-text-sub); margin-bottom: 24px;">CaniGesta is designed with privacy as a core principle. <strong>We collect no personal data.</strong> All pregnancy calculations, breed lookups, and timeline generation happen entirely in your browser (client-side). No data is sent to any server.</p>
+      <h3>Who we are</h3>
+      <p>CaniGesta is a privacy-first educational tool designed to help breeders track canine gestation timelines.</p>
 
-      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">What We Do Not Collect</h2>
-      <ul style="color: var(--color-text-sub); padding-left: 20px; margin-bottom: 24px; display: flex; flex-direction: column; gap: 6px;">
-        <li>Dog names, mating dates, or any pregnancy data you enter</li>
-        <li>Email addresses (unless you voluntarily submit a reminder form)</li>
-        <li>Location data, IP addresses, or browsing history</li>
-        <li>Cookies for tracking or analytics</li>
-      </ul>
+      <h3 style="margin-top: 24px;">Data Collection</h3>
+      <p>We do not collect or store any of your personal data on our servers. The entire CaniGesta application runs securely in your local browser.</p>
 
-      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">localStorage Usage</h2>
-      <p style="color: var(--color-text-sub); margin-bottom: 24px;">If you create an account or save litters, this data is stored <strong>exclusively in your browser's localStorage</strong>. It never leaves your device. You can clear it at any time via your browser settings.</p>
+      <h3 style="margin-top: 24px;">LocalStorage Usage</h3>
+      <p>When you use the "Save to My Litters" feature or log in, your dog's pregnancy profiles and session state are saved entirely in your device's <strong>localStorage</strong>. This means the data never leaves your device and is only accessible by you. We do not use cookies or tracking pixels.</p>
 
-      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Third-Party Services</h2>
-      <p style="color: var(--color-text-sub); margin-bottom: 24px;">We load Google Fonts (for typography) and the jsPDF library (for PDF generation) from external CDNs. These may log your IP address per their own privacy policies. We do not control or access these logs.</p>
+      <h3 style="margin-top: 24px;">No Third-Party Sharing</h3>
+      <p>Because we do not possess your data, we cannot and do not share it with any third parties.</p>
 
-      <h2 style="font-size: 1.2rem; margin-bottom: 12px;">Contact</h2>
-      <p style="color: var(--color-text-sub);">For any privacy questions, email us at <a href="mailto:privacy@canigesta.com">privacy@canigesta.com</a> or use the <a href="contact.html">contact form</a>.</p>
+      <h3 style="margin-top: 24px;">Contact</h3>
+      <p>If you have any questions about this Privacy Policy, please contact us at <a href="mailto:privacy@canigesta.com" style="color: var(--color-accent);">privacy@canigesta.com</a>.</p>
     </div>
   </main>
 
-  <footer class="site-footer" style="margin-top: 0;">
+  <footer class="site-footer">
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <span>© 2026 CaniGesta · All rights reserved.</span>
+        <span>© 2026 CaniGesta · All rights reserved. Calculations are estimates — always consult a reproductive DVM.</span>
         <div class="footer-bottom-links">
           <a href="privacy.html">Privacy Policy</a>
           <a href="terms.html">Terms of Use</a>
-          <a href="contact.html">Contact</a>
+          <a href="contact.html">Contact Us</a>
         </div>
       </div>
     </div>
   </footer>
-  <script>
-    const saved = localStorage.getItem('cg_theme');
-    if (saved === 'dark') document.body.classList.add('dark-mode');
-  </script>
 </body>
 </html>

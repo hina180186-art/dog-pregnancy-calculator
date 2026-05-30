@@ -4,14 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Terms of Use — CaniGesta</title>
-  <meta name="description" content="CaniGesta Terms of Use. Read our terms and conditions for using the free dog pregnancy calculator.">
-  <link rel="canonical" href="https://dog-pregnancy-calculator.vercel.app/terms.html">
+  <meta name="description" content="Terms of Use for CaniGesta. Please read carefully before using our calculator.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🐾</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="app.css">
+  <script>if (localStorage.getItem('cg_theme') === 'dark') document.documentElement.classList.add('dark-mode');</script>
 </head>
 <body class="light-mode">
-  <nav class="navbar">
+  <nav class="navbar" id="main-navbar">
     <div class="nav-container">
       <a href="index.html" class="nav-logo" style="text-decoration:none;">
         <svg class="logo-paw" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -24,61 +25,42 @@
         </svg>
         <span class="logo-text">Cani<span class="logo-accent">Gesta</span></span>
       </a>
-      <a href="index.html" class="btn btn-ghost btn-sm" style="margin-left:auto;">← Back to App</a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">← Back to Calculator</a>
+      </div>
     </div>
   </nav>
 
-  <main class="container" style="padding-top: calc(var(--nav-height) + 48px); padding-bottom: 80px; max-width: 720px;">
+  <main class="container" style="padding-top: calc(var(--nav-height) + 48px); padding-bottom: 80px; max-width: 800px;">
     <h1 style="margin-bottom: 8px;">Terms of Use</h1>
-    <p class="text-sub" style="margin-bottom: 36px;">Last updated: May 30, 2026</p>
+    <p class="text-sub" style="margin-bottom: 36px;">Last updated: May 2026</p>
 
-    <div class="panel-card card-shadow" style="padding: 36px; line-height: 1.8; display: flex; flex-direction: column; gap: 20px;">
-      <section>
-        <h2 style="font-size: 1.2rem; margin-bottom: 10px;">1. Acceptance of Terms</h2>
-        <p style="color: var(--color-text-sub);">By using CaniGesta ("the App"), you agree to these terms of use. If you do not agree, please discontinue use of the App immediately.</p>
-      </section>
-      <section>
-        <h2 style="font-size: 1.2rem; margin-bottom: 10px;">2. Nature of the Service</h2>
-        <p style="color: var(--color-text-sub);">CaniGesta is an informational tool that provides <strong>estimated</strong> canine pregnancy timelines based on standard veterinary gestation data. All outputs are approximations and do not constitute veterinary advice. Always consult a licensed veterinarian for clinical decisions regarding your dog's pregnancy and maternal health.</p>
-      </section>
-      <section>
-        <h2 style="font-size: 1.2rem; margin-bottom: 10px;">3. Medical Disclaimer</h2>
-        <p style="color: var(--color-text-sub);">CaniGesta does not replace professional veterinary care. Gestation length varies based on litter size, breed genetics, and individual maternal health. The App's timelines are reference guides, not clinical diagnoses. In emergencies, contact your emergency veterinarian immediately.</p>
-      </section>
-      <section>
-        <h2 style="font-size: 1.2rem; margin-bottom: 10px;">4. No Warranty</h2>
-        <p style="color: var(--color-text-sub);">The App is provided "as is" without warranties of any kind, express or implied. CaniGesta makes no warranties of accuracy, completeness, or fitness for a particular purpose.</p>
-      </section>
-      <section>
-        <h2 style="font-size: 1.2rem; margin-bottom: 10px;">5. Limitation of Liability</h2>
-        <p style="color: var(--color-text-sub);">CaniGesta and its founders shall not be liable for any direct, indirect, incidental, consequential, or punitive damages arising from your use of the App or reliance on its calculations.</p>
-      </section>
-      <section>
-        <h2 style="font-size: 1.2rem; margin-bottom: 10px;">6. Changes to Terms</h2>
-        <p style="color: var(--color-text-sub);">We reserve the right to update these terms at any time. Continued use of the App constitutes acceptance of the updated terms.</p>
-      </section>
-      <section>
-        <h2 style="font-size: 1.2rem; margin-bottom: 10px;">7. Contact</h2>
-        <p style="color: var(--color-text-sub);">Questions about these terms? <a href="contact.html">Contact us here</a>.</p>
-      </section>
+    <div class="panel-card card-shadow" style="padding: 36px; line-height: 1.8;">
+      <h3>Educational Use Only</h3>
+      <p>CaniGesta is designed strictly for educational and informational purposes. The calculators and timelines provided are based on veterinary averages and standard biological patterns.</p>
+
+      <h3 style="margin-top: 24px;">Not Medical Advice</h3>
+      <p>The information generated by CaniGesta does not constitute professional veterinary medical advice. Every dog is unique, and biological variations frequently occur. You are solely responsible for all veterinary decisions regarding your animal.</p>
+
+      <h3 style="margin-top: 24px;">No Warranty</h3>
+      <p>We provide no warranty on the exact accuracy of calculated due dates. Gestation periods can vary significantly between individual dogs, even within the same breed.</p>
+
+      <h3 style="margin-top: 24px;">Limitation of Liability</h3>
+      <p>CaniGesta, its creators, and its contributors shall not be held liable for any pregnancy outcomes, clinical emergencies, dystocia, or any other damages or complications that occur during canine breeding and whelping.</p>
     </div>
   </main>
 
-  <footer class="site-footer" style="margin-top: 0;">
+  <footer class="site-footer">
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <span>© 2026 CaniGesta · All rights reserved.</span>
+        <span>© 2026 CaniGesta · All rights reserved. Calculations are estimates — always consult a reproductive DVM.</span>
         <div class="footer-bottom-links">
           <a href="privacy.html">Privacy Policy</a>
           <a href="terms.html">Terms of Use</a>
-          <a href="contact.html">Contact</a>
+          <a href="contact.html">Contact Us</a>
         </div>
       </div>
     </div>
   </footer>
-  <script>
-    const saved = localStorage.getItem('cg_theme');
-    if (saved === 'dark') document.body.classList.add('dark-mode');
-  </script>
 </body>
 </html>

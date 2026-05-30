@@ -1,11 +1,11 @@
 /* ================================================================
    CaniGesta — Complete SaaS Application Logic
-   All 25 fixes implemented: Auth, PDF, Checklist, Reminders, Toasts
+   All 25 remaining fixes implemented: Auth, PDF, Checklist, Reminders, Toasts, Validation, Animation
 ================================================================ */
 
 'use strict';
 
-// ── BREED DATABASE (Item 15) ──────────────────────────────────────
+// ── BREED DATABASE ──────────────────────────────────────
 const BREED_DATABASE = {
   // Small (61 days, litter 2-4)
   'Chihuahua':           { group: 'Small',  days: 61, litter: '2–4'  },
@@ -32,7 +32,7 @@ const BREED_DATABASE = {
   'Cavalier King Charles': { group: 'Large', days: 64, litter: '6–10' }
 };
 
-// ── 9-WEEK TIMELINE (Item 18) ─────────────────────────────────────
+// ── 9-WEEK TIMELINE ─────────────────────────────────────
 const TIMELINE_WEEKS = [
   {
     week: 1, title: 'Conception & Cellular Division', days: 'Days 0–7',
@@ -83,12 +83,12 @@ const TIMELINE_WEEKS = [
 
 // ── VET CHECKLIST ─────────────────────────────────────────────────
 const CHECKLIST_ITEMS = [
-  { id: 'log',        dayOffset: 0,  title: 'Record mating date and begin prenatal log' },
-  { id: 'ultrasound', dayOffset: 25, title: 'Schedule first vet appointment / ultrasound' },
-  { id: 'nutrition',  dayOffset: 35, title: 'Increase food intake by 25% — switch to puppy formula' },
-  { id: 'xray',       dayOffset: 45, title: 'Book pre-whelping X-ray (puppy count)' },
-  { id: 'whelping',   dayOffset: 49, title: 'Set up and introduce whelping box' },
-  { id: 'temp',       dayOffset: 58, title: 'Begin daily temperature monitoring (alert if below 99°F)' }
+  { id: 'log',        dayOffset: 0,  title: 'Record mating date and start prenatal log' },
+  { id: 'ultrasound', dayOffset: 25, title: 'Schedule vet ultrasound appointment' },
+  { id: 'nutrition',  dayOffset: 35, title: 'Increase food by 25% — switch to puppy formula' },
+  { id: 'xray',       dayOffset: 45, title: 'Book pre-whelping X-ray for puppy count' },
+  { id: 'whelping',   dayOffset: 49, title: 'Set up and introduce the whelping box' },
+  { id: 'temp',       dayOffset: 58, title: 'Start daily rectal temperature monitoring' }
 ];
 
 // ── APP STATE ─────────────────────────────────────────────────────
@@ -113,21 +113,29 @@ document.addEventListener('DOMContentLoaded', () => {
   loadSession();
   initTheme();
   initNav();
+  initScrollSpy();
   initCalculatorForm();
   initCostEstimator();
   initModals();
   initAuthForms();
   blockFutureDates();
-  calculateBudget(); // seed cost display
+  calculateBudget();
 });
 
 // ── SESSION / AUTH ────────────────────────────────────────────────
 function loadSession() {
-  const savedUser = localStorage.getItem('cg_session');
-  if (savedUser) appState.user = JSON.parse(savedUser);
+  const savedSession = localStorage.getItem('cg_session');
+  if (savedSession) {
+    try {
+      const parsed = JSON.parse(savedSession);
+      if (parsed.loggedIn) appState.user = parsed;
+    } catch(e){}
+  }
 
   const savedLitters = localStorage.getItem('cg_litters');
-  if (savedLitters) appState.litters = JSON.parse(savedLitters);
+  if (savedLitters) {
+    try { appState.litters = JSON.parse(savedLitters); } catch(e){}
+  }
 
   renderAuthNav();
   renderLittersTab();
@@ -135,43 +143,44 @@ function loadSession() {
 
 function renderAuthNav() {
   const box = $('auth-status-box');
-  if (!box) return;
+  const mobileBox = $('mobile-auth-box');
 
   if (appState.user && appState.user.loggedIn) {
     const initials = getInitials(appState.user.name);
-    box.innerHTML = `
-      <div class="auth-user-pill">
-        <div class="user-avatar-initials" title="${appState.user.name}">${initials}</div>
-        <span class="user-name-display">${appState.user.name.split(' ')[0]}</span>
-        <button class="btn btn-ghost btn-sm" id="btn-signout">Sign Out</button>
-      </div>
-    `;
-    $('btn-signout').addEventListener('click', signOut);
-
-    // Update mobile auth box too
-    const mobileBox = $('mobile-auth-box');
-    if (mobileBox) mobileBox.innerHTML = `
-      <span style="font-size:0.875rem; color:var(--color-text-sub);">👤 ${appState.user.name.split(' ')[0]}</span>
-      <button class="btn btn-ghost btn-sm" id="mobile-btn-signout">Sign Out</button>
-    `;
-    const mso = $('mobile-btn-signout');
-    if (mso) mso.addEventListener('click', signOut);
-
+    if(box) {
+      box.innerHTML = `
+        <div class="auth-user-pill">
+          <div class="user-avatar-initials" title="${appState.user.name}">${initials}</div>
+          <span class="user-name-display">${appState.user.name.split(' ')[0]}</span>
+          <button class="btn btn-ghost btn-sm" id="btn-signout">Sign Out</button>
+        </div>
+      `;
+      $('btn-signout').addEventListener('click', signOut);
+    }
+    if(mobileBox) {
+      mobileBox.innerHTML = `
+        <span style="font-size:0.875rem; color:var(--color-text-sub); flex:1;">👤 ${appState.user.name.split(' ')[0]}</span>
+        <button class="btn btn-ghost btn-sm" id="mobile-btn-signout">Sign Out</button>
+      `;
+      $('mobile-btn-signout').addEventListener('click', signOut);
+    }
   } else {
-    box.innerHTML = `
-      <button class="btn btn-ghost btn-sm" id="btn-signin-trigger">Log In</button>
-      <button class="btn btn-accent btn-sm" id="btn-signup-trigger">Get PRO</button>
-    `;
-    $('btn-signin-trigger')?.addEventListener('click', () => openModal('modal-auth', 'login'));
-    $('btn-signup-trigger')?.addEventListener('click', () => openModal('modal-pricing'));
-
-    const mobileBox = $('mobile-auth-box');
-    if (mobileBox) mobileBox.innerHTML = `
-      <button class="btn btn-ghost btn-sm" id="mobile-btn-signin">Log In</button>
-      <button class="btn btn-accent btn-sm" id="mobile-btn-signup">Get PRO</button>
-    `;
-    $('mobile-btn-signin')?.addEventListener('click', () => openModal('modal-auth', 'login'));
-    $('mobile-btn-signup')?.addEventListener('click', () => openModal('modal-pricing'));
+    if(box) {
+      box.innerHTML = `
+        <button class="btn btn-ghost btn-sm" id="btn-signin-trigger">Log In</button>
+        <button class="btn btn-accent btn-sm" id="btn-signup-trigger">Get PRO</button>
+      `;
+      $('btn-signin-trigger')?.addEventListener('click', () => openModal('modal-auth', 'login'));
+      $('btn-signup-trigger')?.addEventListener('click', () => openModal('modal-pricing'));
+    }
+    if(mobileBox) {
+      mobileBox.innerHTML = `
+        <button class="btn btn-ghost btn-sm" id="mobile-btn-signin">Log In</button>
+        <button class="btn btn-accent btn-sm" id="mobile-btn-signup">Get PRO</button>
+      `;
+      $('mobile-btn-signin')?.addEventListener('click', () => openModal('modal-auth', 'login'));
+      $('mobile-btn-signup')?.addEventListener('click', () => openModal('modal-pricing'));
+    }
   }
 }
 
@@ -184,7 +193,7 @@ function signOut() {
   localStorage.removeItem('cg_session');
   renderAuthNav();
   renderLittersTab();
-  showToast('Signed out successfully.');
+  showToast('Signed out successfully.', 'info');
 }
 
 // ── THEME ─────────────────────────────────────────────────────────
@@ -192,18 +201,11 @@ function initTheme() {
   const toggle = $('theme-toggle');
   if (!toggle) return;
   toggle.addEventListener('click', () => {
-    const isDark = document.body.classList.toggle('dark-mode');
+    const isDark = document.documentElement.classList.toggle('dark-mode');
+    document.body.classList.toggle('dark-mode', isDark); // fallback
     localStorage.setItem('cg_theme', isDark ? 'dark' : 'light');
     updateThemeIcons(isDark);
   });
-}
-
-function initThemeEarly() {
-  const saved = localStorage.getItem('cg_theme');
-  if (saved === 'dark') {
-    document.body.classList.add('dark-mode');
-    updateThemeIcons(true);
-  }
 }
 
 function updateThemeIcons(isDark) {
@@ -213,12 +215,11 @@ function updateThemeIcons(isDark) {
   if (moon) moon.style.display = isDark ? 'block' : 'none';
 }
 
-// Run theme before anything else
-initThemeEarly();
+const isDarkInit = localStorage.getItem('cg_theme') === 'dark';
+updateThemeIcons(isDarkInit);
 
 // ── NAV / TABS ────────────────────────────────────────────────────
 function initNav() {
-  // Tab switching via data-tab
   document.addEventListener('click', e => {
     const tabTarget = e.target.closest('[data-tab]');
     if (tabTarget) {
@@ -227,40 +228,33 @@ function initNav() {
     }
   });
 
-  // Pricing triggers
   ['nav-btn-pricing', 'nav-pro-cta', 'mobile-btn-pricing', 'hero-btn-pricing-2',
    'btn-mobile-pricing', 'footer-btn-pricing'].forEach(id => {
     $(id)?.addEventListener('click', () => openModal('modal-pricing'));
   });
 
-  // Pricing checkout triggers
   $$('.btn-pro, .btn-primary').forEach(btn => {
     if (btn.id === 'btn-checkout-pro' || btn.id === 'btn-checkout-breeder' || btn.textContent.includes('Get Started')) {
       btn.addEventListener('click', e => {
         if (!appState.user) {
           openModal('modal-auth', 'signup');
         } else {
-          showToast('Payment system coming soon — you will be notified!');
+          showToast('💳 Payment coming soon — you\'ll be first to know!', 'info');
         }
       });
     }
   });
 
-  // Hamburger
   $('hamburger-btn')?.addEventListener('click', toggleMobileMenu);
 
-  // Close modals on overlay click
   $$('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', e => {
       if (e.target === overlay) closeModal(overlay.id);
     });
   });
 
-  // ESC key closes modals
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      $$('.modal-overlay.open').forEach(m => closeModal(m.id));
-    }
+    if (e.key === 'Escape') $$('.modal-overlay.open').forEach(m => closeModal(m.id));
   });
 }
 
@@ -268,6 +262,10 @@ function switchTab(tabId) {
   $$('.tab-view').forEach(v => v.classList.toggle('active', v.id === tabId));
   $$('.nav-link[data-tab]').forEach(l => l.classList.toggle('active', l.getAttribute('data-tab') === tabId));
   appState.currentTab = tabId;
+  
+  // Smooth scroll to top of main app
+  const mainApp = $('main-app');
+  if(mainApp) mainApp.scrollIntoView({ behavior: 'smooth' });
 }
 
 function toggleMobileMenu() {
@@ -275,6 +273,22 @@ function toggleMobileMenu() {
 }
 function closeMobileMenu() {
   $('mobile-menu')?.classList.remove('open');
+}
+
+// ── SCROLL SPY (Active Nav Link) ──────────────────────────────────
+function initScrollSpy() {
+  const sections = $$('.tab-view');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && entry.intersectionRatio > 0.3) {
+        const id = entry.target.id;
+        $$('.nav-link[data-tab]').forEach(l => {
+          l.classList.toggle('active', l.getAttribute('data-tab') === id);
+        });
+      }
+    });
+  }, { threshold: 0.3 });
+  sections.forEach(s => observer.observe(s));
 }
 
 // ── MODALS ────────────────────────────────────────────────────────
@@ -297,68 +311,49 @@ function closeModal(id) {
 }
 
 function initModals() {
-  // Close buttons
   $('btn-close-pricing')?.addEventListener('click',  () => closeModal('modal-pricing'));
   $('btn-close-auth')?.addEventListener('click',     () => closeModal('modal-auth'));
-  $('btn-close-notify')?.addEventListener('click',   () => closeModal('modal-notify'));
   $('btn-close-share')?.addEventListener('click',    () => closeModal('modal-share'));
 
-  // Notify me form
-  $('notify-form')?.addEventListener('submit', e => {
-    e.preventDefault();
-    const name = $('notify-name')?.value?.trim();
-    const email = $('notify-email')?.value?.trim();
-    if (email) {
-      localStorage.setItem('cg_waitlist', JSON.stringify({ name, email, ts: Date.now() }));
-      $('notify-form').style.display = 'none';
-      $('notify-success').style.display = 'block';
-    }
-  });
-
-  // Share copy button
-  $('btn-copy-share')?.addEventListener('click', () => {
+  $('btn-copy-share')?.addEventListener('click', function() {
     const text = $('share-text-display')?.textContent;
     if (text) {
       navigator.clipboard.writeText(text).then(() => {
-        showToast('✅ Copied!');
-        $('share-copy-success').style.display = 'block';
-        setTimeout(() => { $('share-copy-success').style.display = 'none'; }, 2000);
-      }).catch(() => showToast('Please copy the text manually.'));
+        const ogText = this.textContent;
+        this.textContent = '✅ Copied!';
+        setTimeout(() => { this.textContent = ogText; }, 2000);
+      }).catch(() => showToast('Please copy the text manually.', 'error'));
     }
   });
 }
 
 // ── AUTH FORMS ────────────────────────────────────────────────────
 function initAuthForms() {
-  // Tab toggles
   $('btn-auth-tab-login')?.addEventListener('click', () => showAuthPanel('login'));
   $('btn-auth-tab-signup')?.addEventListener('click', () => showAuthPanel('signup'));
 
-  // Cross-links
-  $('btn-go-signup')?.addEventListener('click', () => showAuthPanel('signup'));
-  $('btn-go-login')?.addEventListener('click', () => showAuthPanel('login'));
-  $('btn-go-login-2')?.addEventListener('click', () => showAuthPanel('login'));
-  $('btn-go-forgot')?.addEventListener('click', () => showAuthPanel('forgot'));
+  $('btn-go-signup')?.addEventListener('click', (e) => { e.preventDefault(); showAuthPanel('signup'); });
+  $('btn-go-login')?.addEventListener('click', (e) => { e.preventDefault(); showAuthPanel('login'); });
+  $('btn-go-forgot')?.addEventListener('click', (e) => { e.preventDefault(); showAuthPanel('forgot'); });
 
-  // LOGIN form
+  // LOGIN
   $('form-auth-login')?.addEventListener('submit', e => {
     e.preventDefault();
     const email = $('login-email')?.value?.trim();
     const pass  = $('login-pass')?.value;
-    if (!email || !pass) return showToast('Please fill all fields.');
+    if (!email || !pass) return showToast('Please fill all fields.', 'error');
 
-    // Check stored user
     const stored = JSON.parse(localStorage.getItem('cg_users') || '{}');
     const user = stored[email];
 
     if (user && user.password === btoa(pass)) {
-      loginUser({ name: user.name, email, loggedIn: true });
+      loginUser({ name: user.name, email: user.email, loggedIn: true });
     } else {
-      showToast('Incorrect email or password. Please try again.');
+      showToast('Invalid email or password.', 'error');
     }
   });
 
-  // SIGNUP form
+  // SIGNUP
   $('form-auth-signup')?.addEventListener('submit', e => {
     e.preventDefault();
     const name    = $('signup-name')?.value?.trim();
@@ -366,13 +361,29 @@ function initAuthForms() {
     const pass    = $('signup-pass')?.value;
     const confirm = $('signup-confirm')?.value;
 
-    if (!name || !email || !pass) return showToast('Please fill all fields.');
-    if (pass !== confirm) return showToast('Passwords do not match.');
-    if (pass.length < 6)  return showToast('Password must be at least 6 characters.');
+    if (!name || !email || !pass) return showToast('Please fill all fields.', 'error');
+    if (pass !== confirm) return showToast('Passwords do not match.', 'error');
+    if (pass.length < 6)  return showToast('Password must be at least 6 characters.', 'error');
+    if (!/\S+@\S+\.\S+/.test(email)) return showToast('Invalid email.', 'error');
 
     const users = JSON.parse(localStorage.getItem('cg_users') || '{}');
     if (users[email]) {
-      return showToast('Email already registered. Please log in.');
+      // inline error logic as requested
+      const err = $('signup-email-error');
+      if(err) err.remove();
+      const el = document.createElement('span');
+      el.id = 'signup-email-error';
+      el.className = 'error-msg';
+      el.textContent = 'Email already registered';
+      $('signup-email').parentNode.appendChild(el);
+      $('signup-email').classList.add('error-border');
+      
+      $('signup-email').addEventListener('input', function() {
+        this.classList.remove('error-border');
+        const er = $('signup-email-error');
+        if(er) er.remove();
+      }, {once:true});
+      return;
     }
 
     users[email] = { name, email, password: btoa(pass), createdAt: Date.now() };
@@ -381,15 +392,16 @@ function initAuthForms() {
     loginUser({ name, email, loggedIn: true });
   });
 
-  // FORGOT PASSWORD form
+  // FORGOT PASSWORD
   $('form-auth-forgot')?.addEventListener('submit', e => {
     e.preventDefault();
     $('forgot-success').style.display = 'block';
-    $('forgot-success').textContent = "If this email exists, a reset link has been sent.";
+    $('forgot-success').textContent = "✅ If this email exists, a reset link has been sent.";
     $('form-auth-forgot').style.display = 'none';
     setTimeout(() => {
       $('form-auth-forgot').style.display = 'flex';
       $('forgot-success').style.display = 'none';
+      $('form-auth-forgot').reset();
       showAuthPanel('login');
     }, 4000);
   });
@@ -403,7 +415,8 @@ function showAuthPanel(panel) {
   $('auth-panel-login').style.display  = panel === 'login'  ? 'block' : 'none';
   $('auth-panel-signup').style.display = panel === 'signup' ? 'block' : 'none';
   $('auth-panel-forgot').style.display = panel === 'forgot' ? 'block' : 'none';
-  $('btn-auth-tab-forgot').style.display = panel === 'forgot' ? 'inline-flex' : 'none';
+  const ft = $('btn-auth-tab-forgot');
+  if(ft) ft.style.display = panel === 'forgot' ? 'inline-flex' : 'none';
 }
 
 function loginUser(user) {
@@ -412,7 +425,7 @@ function loginUser(user) {
   closeModal('modal-auth');
   renderAuthNav();
   renderLittersTab();
-  showToast(`Welcome, ${user.name.split(' ')[0]}! 👋`);
+  showToast(`Welcome, ${user.name.split(' ')[0]}! 👋`, 'success');
 }
 
 // ── CALCULATOR FORM ───────────────────────────────────────────────
@@ -443,7 +456,18 @@ function initCalculatorForm() {
 
   form?.addEventListener('submit', e => {
     e.preventDefault();
-    runCalculation();
+    if(validateForm()) {
+      const btn = $('btn-calculate');
+      const ogHtml = btn.innerHTML;
+      btn.innerHTML = `<span style="display:inline-block; animation:spin 1s linear infinite;">⏳</span> Calculating...`;
+      btn.disabled = true;
+      
+      setTimeout(() => {
+        runCalculation();
+        btn.innerHTML = ogHtml;
+        btn.disabled = false;
+      }, 600);
+    }
   });
 
   $('btn-reset-form')?.addEventListener('click', resetCalculator);
@@ -452,50 +476,85 @@ function initCalculatorForm() {
   $('btn-share-results')?.addEventListener('click', shareResults);
   $('btn-print-page')?.addEventListener('click', () => window.print());
 
-  // Email reminders form
+  // Email reminders form to Formspree (Item 7)
   $('email-reminders-form')?.addEventListener('submit', e => {
     e.preventDefault();
     const btn = $('email-reminders-form').querySelector('button');
     btn.textContent = 'Subscribing...';
+    btn.disabled = true;
+    
     const name  = $('reminder-name')?.value?.trim();
     const email = $('reminder-email')?.value?.trim();
     const dog   = appState.calc.dogName || 'your dog';
     
-    // Validate email
     if (!email || !/\S+@\S+\.\S+/.test(email)) {
-      showToast('Please enter a valid email address.');
-      btn.textContent = 'Subscribe to Alerts';
+      showToast('Please enter a valid email address.', 'error');
+      btn.textContent = 'Get Reminders 🔔';
+      btn.disabled = false;
       return;
     }
     
-    // Mock Formspree submission using fetch
-    fetch('https://formspree.io/f/xkgwppbz', {
+    fetch('https://formspree.io/f/xpwzgkna', {
       method: 'POST',
       headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, name, dogName: dog, dueDate: appState.calc.dueDate, breed: appState.calc.breed })
+      body: JSON.stringify({ email, name, dogName: dog, dueDate: appState.calc.dueDate, breed: appState.calc.breed, currentWeek: appState.calc.currentWeek })
     })
     .then(response => {
       if (response.ok) {
         $('email-reminders-form').style.display = 'none';
         $('email-success-message').style.display = 'block';
         $('email-success-dog-name').textContent = dog;
-        showToast('✅ Subscribed successfully!');
+        showToast('Subscription Successful!', 'success');
       } else {
-        showToast('Something went wrong — please try again.');
-        btn.textContent = 'Subscribe to Alerts';
+        throw new Error('Network response was not ok');
       }
     })
     .catch(error => {
-      showToast('Something went wrong — please try again.');
-      btn.textContent = 'Subscribe to Alerts';
+      showToast('Something went wrong — try again.', 'error');
+      btn.textContent = 'Get Reminders 🔔';
+      btn.disabled = false;
     });
   });
 }
 
+function validateForm() {
+  let valid = true;
+  const fields = [
+    { id: 'dog-name', msg: 'Dog name is required' },
+    { id: 'breed-select', msg: 'Please select a breed' },
+    { id: 'mating-date', msg: 'Mating date is required' }
+  ];
+  
+  fields.forEach(f => {
+    const el = $(f.id);
+    // clear old
+    el.classList.remove('error-border');
+    const oldErr = $(f.id + '-error');
+    if(oldErr) oldErr.remove();
+    
+    if (!el.value || el.value.trim() === '') {
+      valid = false;
+      el.classList.add('error-border');
+      const err = document.createElement('span');
+      err.id = f.id + '-error';
+      err.className = 'error-msg';
+      err.textContent = f.msg;
+      el.parentNode.appendChild(err);
+      
+      el.addEventListener('input', function() {
+        this.classList.remove('error-border');
+        const er = $(f.id + '-error');
+        if(er) er.remove();
+      }, {once:true});
+    }
+  });
+  return valid;
+}
+
 function blockFutureDates() {
   const today = new Date().toISOString().split('T')[0];
-  $('mating-date') && ($('mating-date').max = today);
-  $('ovulation-date') && ($('ovulation-date').max = today);
+  if($('mating-date')) $('mating-date').max = today;
+  if($('ovulation-date')) $('ovulation-date').max = today;
 }
 
 function runCalculation() {
@@ -504,9 +563,6 @@ function runCalculation() {
   const matingVal    = $('mating-date')?.value;
   const ovulationVal = $('ovulation-date')?.value;
   const gestDays     = parseInt($('gestation-days')?.value || '63');
-
-  if (!breed) { showToast('Please select a breed.'); return; }
-  if (!matingVal) { showToast('Please enter a mating date.'); return; }
 
   const breedInfo  = BREED_DATABASE[breed] || { group: 'Medium', days: 63, litter: '4–6' };
   const matingDate = new Date(matingVal + 'T00:00:00');
@@ -548,7 +604,15 @@ function renderResults() {
   $('display-week-badge').textContent  = `Week ${c.currentWeek} of 9`;
 
   $('display-progress-percent').textContent = `${c.progress}%`;
-  $('bar-fill').style.width   = `${c.progress}%`;
+  const fill = $('bar-fill');
+  fill.style.width = `${c.progress}%`;
+  
+  // Color code progress bar
+  fill.className = 'progress-fill';
+  if(c.progress < 70) fill.classList.add('green');
+  else if (c.progress < 95) fill.classList.add('amber');
+  else fill.classList.add('red');
+
   $('bar-runner').style.left  = `${c.progress}%`;
   $('display-track-start').textContent = `Mated ${formatDate(c.matingDate)}`;
   $('display-track-due').textContent   = `Due ${formatDate(c.dueDate)}`;
@@ -561,6 +625,14 @@ function renderResults() {
   $('display-litter-size').textContent     = c.litterSize;
 
   $('email-dog-name-display').textContent = c.dogName;
+
+  // Add animation class to metric cards
+  $$('.metric-card').forEach((card, i) => {
+    card.classList.remove('fade-up-card');
+    void card.offsetWidth; // trigger reflow
+    card.classList.add('fade-up-card');
+    card.style.animationDelay = `${i * 100}ms`;
+  });
 
   renderChecklist();
   renderTimeline();
@@ -587,10 +659,10 @@ function renderChecklist() {
       completedCount++;
     } else if (daysDiff <= 3 && daysDiff >= 0) {
       status   = 'status-due';    icon = '⏰';
-      tagLabel = 'Due soon';      tagClass = 'tag-due';
+      tagLabel = `Due soon · ${formatDate(targetDate)}`; tagClass = 'tag-due';
     } else {
       status   = 'status-upcoming'; icon = '⬜';
-      tagLabel = 'Upcoming';        tagClass = 'tag-upcoming';
+      tagLabel = `Upcoming · ${formatDate(targetDate)}`; tagClass = 'tag-upcoming';
     }
 
     const row = document.createElement('div');
@@ -599,8 +671,7 @@ function renderChecklist() {
       <span class="chk-icon" style="font-size:1.2rem; ${status === 'status-done' ? '' : 'opacity:0.6;'}">${icon}</span>
       <div class="chk-body">
         <div class="chk-top">
-          <h4 class="chk-title" style="${status === 'status-done' ? 'text-decoration:line-through; color:var(--color-text-sub);' : ''}">${item.title}</h4>
-          <span class="chk-date">${formatDateLong(targetDate)}</span>
+          <h4 class="chk-title" style="${status === 'status-done' ? 'text-decoration:line-through; color:var(--color-success);' : ''}">${item.title}</h4>
         </div>
         <span class="chk-tag ${tagClass}">${tagLabel}</span>
       </div>
@@ -659,11 +730,12 @@ function renderTimeline() {
 function savePregnancy() {
   const c = appState.calc;
   if (!c.dogName || !c.matingDate) {
-    showToast('Please run a calculation first.');
+    showToast('Please run a calculation first.', 'error');
     return;
   }
 
   const profile = {
+    id: Date.now(),
     dogName: c.dogName, breed: c.breed, breedGroup: c.breedGroup,
     matingDate: c.matingDate.toISOString().split('T')[0],
     dueDate: c.dueDate.toISOString().split('T')[0],
@@ -671,7 +743,7 @@ function savePregnancy() {
   };
 
   if (!appState.user) {
-    if (confirm('Create a free account to save your litters across devices.\n\nClick OK to Sign Up, or Cancel to continue as Guest and save locally.')) {
+    if (confirm('Save across devices — Sign Up free\n\nClick OK to Sign Up, or Cancel to continue as guest.')) {
       openModal('modal-auth', 'signup');
       return;
     }
@@ -685,7 +757,7 @@ function savePregnancy() {
   }
 
   localStorage.setItem('cg_litters', JSON.stringify(appState.litters));
-  showToast(`✅ ${c.dogName} saved to My Litters!`);
+  showToast(`✅ ${c.dogName} saved to My Litters!`, 'success');
   renderLittersTab();
 }
 
@@ -698,8 +770,8 @@ function renderLittersTab() {
     <div id="litters-active-list" class="litters-grid" style="display:none;"></div>
     <div id="litters-empty-list" class="empty-state card-shadow panel-card" style="padding:50px 30px; display:none;">
       <div style="font-size:3rem;">📁</div>
-      <h3>No Saved Litters Yet</h3>
-      <p>Go to the <strong>Calculator</strong> tab, run a pregnancy calculation, and click <strong>💾 Save to My Litters</strong> to store your dogs here.</p>
+      <h3>No litters saved yet</h3>
+      <p>Calculate a pregnancy and click <strong>💾 Save to My Litters</strong></p>
       <button class="btn btn-primary" style="margin-top:16px;" data-tab="tab-calculator">Go to Calculator →</button>
     </div>`;
 
@@ -713,7 +785,6 @@ function renderLittersTab() {
 
   list.style.display = 'grid';
   appState.litters.forEach(l => {
-    // Recompute current week based on today
     const matingDate = new Date(l.matingDate + 'T00:00:00');
     const today = new Date(); today.setHours(0,0,0,0);
     const dueDate = new Date(l.dueDate + 'T00:00:00');
@@ -723,6 +794,10 @@ function renderLittersTab() {
     const daysRemaining = Math.max(0, Math.floor((dueDate - today) / 86400000));
     const progress = Math.min(100, Math.max(0, Math.round((daysElapsed / l.gestationDays) * 100)));
     const currentWeek = Math.min(9, Math.max(1, Math.ceil((daysElapsed + 1) / 7)));
+
+    let pClass = 'green';
+    if(progress >= 70) pClass = 'amber';
+    if(progress >= 95) pClass = 'red';
 
     const card = document.createElement('div');
     card.className = 'litter-card card-shadow';
@@ -740,7 +815,7 @@ function renderLittersTab() {
       </div>
       <div class="l-progress">
         <div class="l-progress-header"><span>Pregnancy progress</span><span>${progress}%</span></div>
-        <div class="l-track"><div class="l-fill" style="width:${progress}%"></div></div>
+        <div class="l-track"><div class="l-fill progress-fill ${pClass}" style="width:${progress}%"></div></div>
       </div>
       <div class="l-actions">
         <button class="btn btn-ghost" data-load="${l.dogName}">View Details</button>
@@ -752,7 +827,6 @@ function renderLittersTab() {
     list.appendChild(card);
   });
   
-  // Reattach tab listener for the empty state button
   $$('[data-tab="tab-calculator"]').forEach(btn => {
     btn.addEventListener('click', () => switchTab('tab-calculator'));
   });
@@ -773,11 +847,13 @@ function deleteLitter(dogName) {
   appState.litters = appState.litters.filter(l => l.dogName !== dogName);
   localStorage.setItem('cg_litters', JSON.stringify(appState.litters));
   renderLittersTab();
-  showToast(`${dogName}'s profile deleted.`);
+  showToast(`${dogName}'s profile deleted.`, 'info');
 }
 
 function resetCalculator() {
   $('calculator-form')?.reset();
+  $$('.error-border').forEach(e => e.classList.remove('error-border'));
+  $$('.error-msg').forEach(e => e.remove());
   $('gestation-days-badge').textContent = '63 Days';
   $('calc-empty-state').style.display = 'flex';
   $('calc-active-state').style.display = 'none';
@@ -792,7 +868,7 @@ function resetCalculator() {
 
 function shareResults() {
   const c = appState.calc;
-  if (!c.dueDate) { showToast('Run a calculation first.'); return; }
+  if (!c.dueDate) { showToast('Run a calculation first.', 'error'); return; }
 
   const text = `🐾 ${c.dogName} is due on ${formatDateLong(c.dueDate)}! Currently in Week ${c.currentWeek} of 9. Estimated litter size: ${c.litterSize} puppies. Tracked with CaniGesta — dog-pregnancy-calculator.vercel.app`;
   $('share-text-display').textContent = text;
@@ -804,14 +880,14 @@ function shareResults() {
   }
 }
 
-// ── PDF EXPORT ────────────────────────────────────────────────────
+// ── PDF EXPORT (Item 3) ───────────────────────────────────────────
 function generatePDF() {
   const c = appState.calc;
-  if (!c.dueDate) { showToast('Run a calculation first to generate a PDF.'); return; }
+  if (!c.dueDate) { showToast('Run a calculation first to generate a PDF.', 'error'); return; }
 
   const jsPDF = window.jspdf?.jsPDF;
   if (!jsPDF) {
-    showToast('PDF library loading… please try again in a moment.');
+    showToast('PDF library loading… please try again in a moment.', 'info');
     return;
   }
 
@@ -856,7 +932,7 @@ function generatePDF() {
     doc.text(`WHELP WINDOW: ${formatDate(c.earliestWhelp)} – ${formatDate(c.latestWhelp)}`, W / 2 + 8, 70);
     doc.setTextColor(...sub);
     doc.setFont('helvetica', 'normal');
-    doc.text(`Week ${c.currentWeek} of 9 · ${c.daysRemaining} days remaining`, W / 2 + 8, 76);
+    doc.text(`Week ${c.currentWeek} of 9 · ${c.daysRemaining} days remaining · ${c.progress}% complete`, W / 2 + 8, 76);
 
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(12);
@@ -870,11 +946,19 @@ function generatePDF() {
     CHECKLIST_ITEMS.forEach(item => {
       const date = addDays(c.matingDate, item.dayOffset);
       const done = c.daysElapsed >= item.dayOffset;
-      // Use standard ascii fallback if unicode checkbox fails
-      doc.setFont('helvetica', 'normal');
+      const daysDiff = Math.floor((date - new Date()) / 86400000); 
+      
+      let statusIcon = 'O'; // square fallback
+      if(done) statusIcon = 'X';
+      else if(daysDiff <= 3 && daysDiff >=0) statusIcon = '-'; // clock fallback
+      
+      // Use standard ascii fallback for pdf
+      doc.setFont('helvetica', 'bold');
       doc.setTextColor(...dark);
-      const checkStr = done ? '[ X ]' : '[   ]';
-      doc.text(`${checkStr} ${item.title} (Due: ${formatDateLong(date)})`, M + 4, y);
+      doc.text(`[ ${statusIcon} ]  ${item.title}`, M + 4, y);
+      doc.setFont('helvetica', 'normal');
+      doc.setTextColor(...sub);
+      doc.text(`Due: ${formatDateLong(date)}`, W - M - 40, y);
       y += 8;
     });
     
@@ -887,17 +971,34 @@ function generatePDF() {
     doc.line(M, y+3, W - M, y+3);
     
     y += 12;
+    // Table Header
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...sub);
+    doc.text('WEEK', M + 4, y);
+    doc.text('MILESTONE', M + 20, y);
+    doc.text('DATE', W - M - 45, y);
+    doc.text('STATUS', W - M - 15, y);
+    y += 6;
+
     TIMELINE_WEEKS.forEach(w => {
       if (y > 270) { doc.addPage(); y = 20; }
       const wkStart = addDays(c.matingDate, (w.week - 1) * 7);
       const isCurr  = w.week === c.currentWeek;
+      const isPast  = w.week < c.currentWeek;
       
+      let statusStr = 'O';
+      if(isPast) statusStr = 'X';
+      else if(isCurr) statusStr = '-';
+
       doc.setFont('helvetica', isCurr ? 'bold' : 'normal');
       doc.setTextColor(...dark);
-      doc.text(`Week ${w.week}: ${w.title}`, M + 4, y);
+      doc.text(`Wk ${w.week}`, M + 4, y);
+      doc.text(`${w.title}`, M + 20, y);
       doc.setFontSize(8);
       doc.setTextColor(...sub);
-      doc.text(`${formatDate(wkStart)}`, W - M - 20, y);
+      doc.text(`${formatDate(wkStart)}`, W - M - 45, y);
+      doc.text(`[ ${statusStr} ]`, W - M - 15, y);
       doc.setFontSize(9);
       y += 7;
     });
@@ -906,14 +1007,14 @@ function generatePDF() {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(8);
     doc.setTextColor(...sub);
-    doc.text('Generated by CaniGesta.com — For educational use only. Consult a reproductive DVM for clinical decisions.', W / 2, footerY, { align: 'center' });
+    doc.text('Generated by CaniGesta.com — Educational use only. Consult a reproductive DVM.', W / 2, footerY, { align: 'center' });
 
-    doc.save(`${c.dogName.toLowerCase().replace(/\s+/g, '-')}-gestation-report.pdf`);
-    showToast(`✅ PDF report for ${c.dogName} downloaded!`);
+    doc.save(`${c.dogName.toLowerCase().replace(/\s+/g, '-')}-CaniGesta-Report.pdf`);
+    showToast(`✅ PDF report downloaded!`, 'success');
 
   } catch (err) {
     console.error('jsPDF error:', err);
-    showToast('PDF generation failed.');
+    showToast('PDF generation failed.', 'error');
   }
 }
 
@@ -964,14 +1065,14 @@ function formatDateLong(date) {
   return date.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 }
 
-// ── TOAST NOTIFICATION ────────────────────────────────────────────
-function showToast(message) {
+// ── TOAST NOTIFICATION (Item 9A) ──────────────────────────────────
+function showToast(message, type = 'info') {
   let toast = document.querySelector('.toast');
   if (!toast) {
     toast = document.createElement('div');
-    toast.className = 'toast';
     document.body.appendChild(toast);
   }
+  toast.className = `toast toast-${type}`;
   toast.textContent = message;
   toast.classList.add('visible');
   clearTimeout(toast._timer);
